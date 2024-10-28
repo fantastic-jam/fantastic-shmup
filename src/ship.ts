@@ -1,4 +1,5 @@
 import { Actor } from "./engine/actor"; // Adjust the import path as necessary
+import { Input } from "./engine/input";
 import { AnimatedSprite } from "./engine/sprite/animated-sprite"; // Adjust the import path as necessary
 import { Weapon } from "./engine/weapon/weapon"; // Adjust the import path as necessary
 
@@ -13,23 +14,46 @@ export class Ship extends Actor {
     this.weapon = new Weapon(spriteEngine, 0, 0, 1, this);
   }
 
+  private getDir(): { x: number; y: number } {
+    let x = 0;
+    let y = 0;
+
+    for (const joystick of Input.getJoysticks()) {
+      const axisX = joystick.getGamepadAxis("leftx");
+      const axisY = joystick.getGamepadAxis("lefty");
+
+      if (Math.abs(axisX) > 0.2) {
+        x = axisX;
+      }
+
+      if (Math.abs(axisY) > 0.2) {
+        y = -axisY;
+      }
+      if (joystick.isGamepadDown("start")) {
+        love.event.quit(0);
+      }
+    }
+    return { x, y };
+  }
+
+  private isFiring(): boolean {
+    for (const joystick of Input.getJoysticks()) {
+      if (joystick.isGamepadDown("b")) {
+        return true;
+      }
+    }
+  }
+
   update(dt: number) {
     super.update(dt); // Call the parent class's update method
     this.weapon.update(dt);
 
-    if (love.keyboard.isDown("left")) {
-      this.x -= this.speed * dt;
-    } else if (love.keyboard.isDown("right")) {
-      this.x += this.speed * dt;
-    }
+    const dir = this.getDir();
 
-    if (love.keyboard.isDown("up")) {
-      this.y -= this.speed * dt;
-    } else if (love.keyboard.isDown("down")) {
-      this.y += this.speed * dt;
-    }
+    this.x += dir.x * this.speed * dt;
+    this.y += dir.y * this.speed * dt;
 
-    if (love.keyboard.isDown("space")) {
+    if (this.isFiring()) {
       this.weapon.fire();
     }
   }
