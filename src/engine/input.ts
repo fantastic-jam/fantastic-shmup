@@ -138,7 +138,7 @@ export class KeyboardJoystick implements Joystick {
 export class Input {
   private static keyboard = new KeyboardJoystick();
   static getJoysticks(): Joystick[] {
-    if (love.keyboard) {
+    if (love.keyboard?.isScancodeDown) {
       return [this.keyboard, ...love.joystick.getJoysticks()];
     }
     return love.joystick.getJoysticks();
