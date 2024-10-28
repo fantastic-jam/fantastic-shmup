@@ -4,7 +4,7 @@ export NAME=fantastic-shmup
 
 make_love() {
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-        cd src
+        cd lua
         powershell Compress-Archive -Path ".\*" -DestinationPath "../$NAME.zip"
         cd ..
     else

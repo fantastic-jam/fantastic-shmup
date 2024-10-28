@@ -41,6 +41,10 @@ luac.out
 
 # dist folder
 /dist
+/lua
+
+# node modules
+/node_modules
 
 # love redist executable for build
 !redist/win/love.exe
