@@ -1,23 +1,19 @@
+import { Vector2 } from "./tools";
+
 export class Camera {
-    x: number;
-    y: number;
-    scale: number;
-    speed: number;
+  constructor(
+    public pos: Vector2 = new Vector2(0, 0),
+    public scale: number = 1,
+    public speed: number = 200
+  ) {}
 
-    constructor(x: number = 0, y: number = 0, scale: number = 1, speed: number = 200) {
-        this.x = x;
-        this.y = y;
-        this.scale = scale;
-        this.speed = speed;
-    }
+  set() {
+    love.graphics.push();
+    love.graphics.scale(this.scale);
+    love.graphics.translate(-this.pos.x, -this.pos.y);
+  }
 
-    set() {
-        love.graphics.push();
-        love.graphics.scale(this.scale);
-        love.graphics.translate(-this.x, -this.y);
-    }
-
-    unset() {
-        love.graphics.pop();
-    }
+  unset() {
+    love.graphics.pop();
+  }
 }

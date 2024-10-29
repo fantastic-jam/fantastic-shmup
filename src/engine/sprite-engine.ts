@@ -2,16 +2,10 @@ import { Actor } from "./actor";
 import { Camera } from "./camera";
 
 export class SpriteEngine {
-  x: number;
-  y: number;
-  actors: any[];
-  camera: Camera;
+  private actors: Actor[] = [];
 
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+  constructor(public camera: Camera = new Camera()) {
     this.actors = [];
-    this.camera = new Camera(0, 0, 1, 200);
   }
 
   addActor(actor: Actor) {

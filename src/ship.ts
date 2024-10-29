@@ -1,17 +1,19 @@
 import { Actor } from "./engine/actor"; // Adjust the import path as necessary
 import { Input } from "./engine/input/input";
+import { SpriteEngine } from "./engine/sprite-engine";
 import { AnimatedSprite } from "./engine/sprite/animated-sprite"; // Adjust the import path as necessary
+import { Vector2 } from "./engine/tools";
 import { Weapon } from "./engine/weapon/weapon"; // Adjust the import path as necessary
 
 export class Ship extends Actor {
   weapon: Weapon;
 
-  constructor(spriteEngine: any, x: number, y: number) {
-    const image = love.graphics.newImage("assets/ship.png");
+  constructor(spriteEngine: SpriteEngine, pos: Vector2) {
+    const image = love.graphics.newImage("/assets/ship.png");
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
-    super(spriteEngine, x, y, 200, animatedSprite);
+    super(spriteEngine, pos, 200, animatedSprite);
 
-    this.weapon = new Weapon(spriteEngine, 0, 0, 1, this);
+    this.weapon = new Weapon(spriteEngine, new Vector2(30, 10), 0.15, this);
   }
 
   private getDir(): { x: number; y: number } {
@@ -50,8 +52,8 @@ export class Ship extends Actor {
 
     const dir = this.getDir();
 
-    this.x += dir.x * this.speed * dt;
-    this.y += dir.y * this.speed * dt;
+    this.pos.x += dir.x * this.speed * dt;
+    this.pos.y += dir.y * this.speed * dt;
 
     if (this.isFiring()) {
       this.weapon.fire();

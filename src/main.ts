@@ -1,5 +1,6 @@
 import "./conf";
 import { SpriteEngine } from "./engine/sprite-engine";
+import { Vector2 } from "./engine/tools";
 import { Ship } from "./ship";
 
 import { StarField } from "./world/starfield";
@@ -8,9 +9,9 @@ let spriteEngine: SpriteEngine;
 let starField: StarField;
 
 love.load = () => {
-  starField = new StarField(8);
-  spriteEngine = new SpriteEngine(0, 0);
-  spriteEngine.addActor(new Ship(spriteEngine, 300, 200));
+  starField = new StarField(4, 300);
+  spriteEngine = new SpriteEngine();
+  spriteEngine.addActor(new Ship(spriteEngine, new Vector2(300, 200)));
 };
 
 love.update = (dt) => {
