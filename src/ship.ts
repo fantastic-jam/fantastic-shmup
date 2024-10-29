@@ -27,7 +27,7 @@ export class Ship extends Actor {
       }
 
       if (Math.abs(axisY) > 0.2) {
-        y = -axisY;
+        y = axisY;
       }
       if (joystick.isGamepadDown("start")) {
         love.event.quit(0);

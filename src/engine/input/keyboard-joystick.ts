@@ -44,7 +44,7 @@ export class KeyboardJoystick implements Joystick {
     throw new Error("Method not implemented.");
   }
   getGUID(): string {
-    throw new Error("Method not implemented.");
+    return "{cf6b8ee3-dec9-4122-93cc-e7b1ca46b008}";
   }
   getGamepadMappingString(): string | undefined {
     throw new Error("Method not implemented.");
@@ -132,15 +132,5 @@ export class KeyboardJoystick implements Joystick {
   }
   typeOf<T extends keyof Types>(name: T): this is Types[T] {
     throw new Error("Method not implemented.");
-  }
-}
-
-export class Input {
-  private static keyboard = new KeyboardJoystick();
-  static getJoysticks(): Joystick[] {
-    if (love.keyboard?.isScancodeDown) {
-      return [this.keyboard, ...love.joystick.getJoysticks()];
-    }
-    return love.joystick.getJoysticks();
   }
 }
