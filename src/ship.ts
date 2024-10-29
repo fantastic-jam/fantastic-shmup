@@ -1,5 +1,5 @@
 import { Actor } from "./engine/actor"; // Adjust the import path as necessary
-import { Input } from "./engine/input";
+import { Input } from "./engine/input/input";
 import { AnimatedSprite } from "./engine/sprite/animated-sprite"; // Adjust the import path as necessary
 import { Weapon } from "./engine/weapon/weapon"; // Adjust the import path as necessary
 
@@ -8,7 +8,7 @@ export class Ship extends Actor {
 
   constructor(spriteEngine: any, x: number, y: number) {
     const image = love.graphics.newImage("assets/ship.png");
-    const animatedSprite = new AnimatedSprite(image, 80, 64, 0.1);
+    const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     super(spriteEngine, x, y, 200, animatedSprite);
 
     this.weapon = new Weapon(spriteEngine, 0, 0, 1, this);
