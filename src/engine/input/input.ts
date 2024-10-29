@@ -18,8 +18,8 @@ export class Input {
         case "{6EBE242C-820F-46E1-9A66-DC8200686D51}": // switch
           return new RemappedJoystick(j, {
             axis: {
-              lefty: { axis: "lefty", inverse: false },
-              leftx: { axis: "rightx", inverse: false },
+              lefty: { axis: "lefty", inverse: true },
+              righty: { axis: "righty", inverse: true },
             },
           });
         default:

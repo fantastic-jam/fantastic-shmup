@@ -9,6 +9,14 @@ import {
 import { Scancode } from "love.keyboard";
 
 export class KeyboardJoystick implements Joystick {
+  private static axes: GamepadAxis[] = [
+    "leftx",
+    "lefty",
+    "rightx",
+    "righty",
+    "triggerleft",
+    "triggerright",
+  ];
   private static mapping: Record<GamepadButton, Scancode> = {
     a: "space",
     b: "g",
@@ -27,13 +35,16 @@ export class KeyboardJoystick implements Joystick {
     y: "f",
   };
   getAxes(): LuaMultiReturn<number[]> {
-    throw new Error("Method not implemented.");
+    return $multi(...KeyboardJoystick.axes.map(axis => this.getGamepadAxis(axis)));
   }
   getAxis(axis: number): number {
-    throw new Error("Method not implemented.");
+    if (axis >= KeyboardJoystick.axes.length) {
+      return 0;
+    }
+    return this.getGamepadAxis(KeyboardJoystick.axes[axis]);
   }
   getAxisCount(): number {
-    throw new Error("Method not implemented.");
+    return 6;
   }
   getButtonCount(): number {
     throw new Error("Method not implemented.");
@@ -68,7 +79,7 @@ export class KeyboardJoystick implements Joystick {
         result += love.keyboard.isScancodeDown("o") ? -1 : 0;
         result += love.keyboard.isScancodeDown("l") ? 1 : 0;
         break;
-      case "triggerright":
+      case "triggerleft":
         result += love.keyboard.isScancodeDown("1") ? 1 : 0;
         break;
       case "triggerright":
