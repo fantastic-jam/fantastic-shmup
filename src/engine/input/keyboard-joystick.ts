@@ -57,16 +57,16 @@ export class KeyboardJoystick implements Joystick {
         result += love.keyboard.isScancodeDown("d") ? 1 : 0;
         break;
       case "lefty":
-        result += love.keyboard.isScancodeDown("w") ? 1 : 0;
-        result += love.keyboard.isScancodeDown("s") ? -1 : 0;
+        result += love.keyboard.isScancodeDown("w") ? -1 : 0;
+        result += love.keyboard.isScancodeDown("s") ? 1 : 0;
         break;
       case "rightx":
         result += love.keyboard.isScancodeDown("k") ? -1 : 0;
         result += love.keyboard.isScancodeDown(";") ? 1 : 0;
         break;
       case "righty":
-        result += love.keyboard.isScancodeDown("o") ? 1 : 0;
-        result += love.keyboard.isScancodeDown("l") ? -1 : 0;
+        result += love.keyboard.isScancodeDown("o") ? -1 : 0;
+        result += love.keyboard.isScancodeDown("l") ? 1 : 0;
         break;
       case "triggerright":
         result += love.keyboard.isScancodeDown("1") ? 1 : 0;
