@@ -1,3 +1,4 @@
+import { Screen } from "love.graphics";
 import { SpriteEngine } from "./sprite-engine";
 import { Sprite } from "./sprite/sprite";
 import { Vector2 } from "./tools";
@@ -33,8 +34,8 @@ export class Actor {
     return this.parent ? this.pos.add(this.parent.pos) : this.pos;
   }
 
-  draw() {
-    this.sprite.draw(this.globalX(), this.globalY());
+  draw(screen?: Screen) {
+    this.sprite.draw(this.pos, screen);
   }
 
   // translate() {

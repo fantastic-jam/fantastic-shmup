@@ -1,3 +1,8 @@
+export const config = {
+  screenWidth: 400,
+  screenHeight: 240,
+};
+
 love.conf = (config) => {
   config.identity = "data/saves";
   config.window.width = 1280;

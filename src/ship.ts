@@ -1,9 +1,9 @@
-import { Actor } from "./engine/actor"; // Adjust the import path as necessary
+import { Actor } from "./engine/actor";
 import { Input } from "./engine/input/input";
 import { SpriteEngine } from "./engine/sprite-engine";
-import { AnimatedSprite } from "./engine/sprite/animated-sprite"; // Adjust the import path as necessary
+import { AnimatedSprite } from "./engine/sprite/animated-sprite";
 import { Vector2 } from "./engine/tools";
-import { Weapon } from "./engine/weapon/weapon"; // Adjust the import path as necessary
+import { Weapon } from "./engine/weapon/weapon";
 
 export class Ship extends Actor {
   weapon: Weapon;

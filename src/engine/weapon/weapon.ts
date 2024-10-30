@@ -1,7 +1,7 @@
-import { Actor } from "../actor"; // Adjust the import path as necessary
+import { Actor } from "../actor";
 import { SpriteEngine } from "../sprite-engine";
 import { Vector2 } from "../tools";
-import { Projectile } from "./projectile"; // Adjust the import path as necessary
+import { Projectile } from "./projectile";
 
 export class Weapon extends Actor {
   lastFired?: number = undefined;

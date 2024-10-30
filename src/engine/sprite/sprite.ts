@@ -1,3 +1,6 @@
+import { Screen } from "love.graphics";
+import { Vector2 } from "../tools";
+
 export class Sprite {
     width: number;
     height: number;
@@ -8,10 +11,8 @@ export class Sprite {
     }
 
     update(dt: number) {
-        // Update logic here
     }
 
-    draw(x: number, y: number) {
-        // Draw logic here
+    draw(pos: Vector2, screen?: Screen) {
     }
 }

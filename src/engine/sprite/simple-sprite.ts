@@ -1,4 +1,4 @@
-import { Sprite } from './sprite'; // Adjust the import path as necessary
+import { Sprite } from './sprite';
 
 export class SimpleSprite extends Sprite {
     image: any;

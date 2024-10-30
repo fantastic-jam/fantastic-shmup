@@ -1,4 +1,6 @@
-import { Sprite } from "./sprite"; // Adjust the import path as necessary
+import { Screen } from "love.graphics";
+import { Vector2 } from "../tools";
+import { Sprite } from "./sprite";
 
 function loadAnimations(
   spritesheet: any,
@@ -54,19 +56,19 @@ export class AnimatedSprite extends Sprite {
 
   update(dt: number) {
     this.elapsedTime += dt;
-    if (this.elapsedTime > this.animationSpeed) {
+    while (this.elapsedTime > this.animationSpeed) {
       this.elapsedTime -= this.animationSpeed;
       this.currentFrame =
         (this.currentFrame + 1) % this.animations[this.currentAnimation].length;
     }
   }
 
-  draw(x: number, y: number) {
+  draw(pos: Vector2, screen?: Screen) {
     love.graphics.draw(
       this.spritesheet,
       this.animations[this.currentAnimation][this.currentFrame],
-      x,
-      y
+      pos.x,
+      pos.y
     );
   }
 }

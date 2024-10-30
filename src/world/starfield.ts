@@ -1,9 +1,15 @@
+import { Screen } from "love.graphics";
+import { Camera } from "../engine/camera";
 import { Star } from "./star";
 
 export class StarField {
   private stars: Star[][] = [];
 
-  constructor(public layers: number = 4, public starCount: number = 600) {
+  constructor(
+    private camera: Camera,
+    public layers: number = 4,
+    public starCount: number = 600
+  ) {
     for (let i = 0; i < layers; i++) {
       this.stars.push([]);
     }
@@ -21,25 +27,37 @@ export class StarField {
     for (let i = 0; i < this.stars.length; i++) {
       const layer = this.stars[i];
       for (const star of layer) {
-        star.x = star.x - 30 * i * dt;
+        star.x = star.x - 30 * (i + 1) * dt;
         if (star.x < 0) {
-          star.x = love.graphics.getWidth();
+          star.x += love.graphics.getWidth();
           star.y = love.math.random(0, love.graphics.getHeight());
         }
       }
     }
   }
 
-  public draw() {
+  public draw(screen?: Screen) {
+    let sysDepth = -(love.graphics.getDepth?.() ?? 0);
+    if (screen === "left") {
+      sysDepth = -sysDepth;
+    }
+
     let brightness = 255;
     for (let i = 0; i < this.stars.length; i++) {
       const layer = this.stars[i];
       for (const star of layer) {
         love.graphics.setColor(brightness, brightness, brightness);
-        love.graphics.rectangle("fill", star.x, star.y, i * (2 / this.layers), i * (2 / this.layers));
-        //love.graphics.printf('.', star.x, star.x, star.y)
+        const layerDepth = (this.layers - i) * 6;
+    
+        love.graphics.rectangle(
+          "fill",
+          star.x - (sysDepth * layerDepth),
+          star.y,
+          (i + 1) * (1.5 / this.layers) * (this.camera.scale ?? 1),
+          (i + 1) * (1.5 / this.layers) * (this.camera.scale ?? 1)
+        );
       }
-      brightness = brightness - (150 / this.layers);
+      brightness = brightness - 150 / this.layers;
     }
     love.graphics.setColor(255, 255, 255);
   }

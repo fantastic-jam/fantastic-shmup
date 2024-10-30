@@ -1,11 +1,17 @@
+import { Screen } from "love.graphics";
 import { Actor } from "./actor";
 import { Camera } from "./camera";
+import { Input } from "./input/input";
 
 export class SpriteEngine {
   private actors: Actor[] = [];
 
   constructor(public camera: Camera = new Camera()) {
     this.actors = [];
+  }
+
+  getActors(){
+    return [...this.actors];
   }
 
   addActor(actor: Actor) {
@@ -27,10 +33,10 @@ export class SpriteEngine {
     }
   }
 
-  draw() {
+  draw(screen?: Screen) {
     this.camera.set();
     for (let actor of this.actors) {
-      actor.draw();
+      actor.draw(screen);
     }
     this.camera.unset();
   }
