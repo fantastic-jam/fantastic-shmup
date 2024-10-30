@@ -1,64 +1,74 @@
 import { Screen } from "love.graphics";
+import { config } from "../conf";
 import { Camera } from "../engine/camera";
-import { Star } from "./star";
+import { Vector3 } from "../engine/tools";
+
+export class Star {
+  constructor(public pos: Vector3) {}
+}
+
+const STAR_MAX_DEPTH = 50;
+const MAX_BRIGHTNESS = 255;
+const STAR_SPEED = 2;
+const STEREOSCOPIC_EFFECT = 0.5;
+const DEPTH_SIZE_RATIO = 0.03;
 
 export class StarField {
-  private stars: Star[][] = [];
+  private stars: Star[] = [];
 
-  constructor(
-    private camera: Camera,
-    public layers: number = 4,
-    public starCount: number = 600
-  ) {
-    for (let i = 0; i < layers; i++) {
-      this.stars.push([]);
-    }
+  constructor(private camera: Camera, public starCount: number = 600) {
     for (let i = 0; i < starCount; i++) {
       const star = new Star(
-        love.math.random(0, love.graphics.getWidth()),
-        love.math.random(0, love.graphics.getHeight())
+        new Vector3(
+          love.math.random(0, config.screenWidth),
+          love.math.random(0, config.screenHeight),
+          love.math.random(1, STAR_MAX_DEPTH)
+        )
       );
-      const layer = love.math.random(0, this.layers - 1);
-      this.stars[layer].push(star);
+      this.stars.push(star);
     }
   }
 
   public update(dt: number) {
-    for (let i = 0; i < this.stars.length; i++) {
-      const layer = this.stars[i];
-      for (const star of layer) {
-        star.x = star.x - 30 * (i + 1) * dt;
-        if (star.x < 0) {
-          star.x += love.graphics.getWidth();
-          star.y = love.math.random(0, love.graphics.getHeight());
-        }
+    const scale = this.camera.scale ?? 1;
+    for (const star of this.stars) {
+      star.pos.x = star.pos.x - STAR_SPEED * star.pos.z * dt;
+      if (star.pos.x < 0) {
+        star.pos.x += config.screenWidth;
+        star.pos.y = love.math.random(0, config.screenHeight);
       }
     }
   }
 
-  public draw(screen?: Screen) {
-    let sysDepth = -(love.graphics.getDepth?.() ?? 0);
+  private getSteroscopticEffect(screen?: Screen): number {
+    if (!screen || !love.graphics.getDepth) {
+      return 0;
+    }
+    let sysDepth = -love.graphics.getDepth();
     if (screen === "left") {
       sysDepth = -sysDepth;
     }
+    return sysDepth * STEREOSCOPIC_EFFECT;
+  }
 
-    let brightness = 255;
-    for (let i = 0; i < this.stars.length; i++) {
-      const layer = this.stars[i];
-      for (const star of layer) {
-        love.graphics.setColor(brightness, brightness, brightness);
-        const layerDepth = (this.layers - i) * 6;
-    
-        love.graphics.rectangle(
-          "fill",
-          star.x - (sysDepth * layerDepth),
-          star.y,
-          (i + 1) * (1.5 / this.layers) * (this.camera.scale ?? 1),
-          (i + 1) * (1.5 / this.layers) * (this.camera.scale ?? 1)
-        );
-      }
-      brightness = brightness - 150 / this.layers;
+  public draw(screen?: Screen) {
+    const scale = this.camera.scale ?? 1;
+    const depthEffect = this.getSteroscopticEffect(screen);
+
+    let brightness = MAX_BRIGHTNESS;
+    for (const star of this.stars) {
+      love.graphics.setColor(brightness, brightness, brightness);
+      const layerDepth = STAR_MAX_DEPTH - star.pos.z;
+
+      love.graphics.rectangle(
+        "fill",
+        (star.pos.x - depthEffect * layerDepth) * scale,
+        star.pos.y * scale,
+        star.pos.z * DEPTH_SIZE_RATIO * scale,
+        star.pos.z * DEPTH_SIZE_RATIO * scale
+      );
+      brightness = 200 + star.pos.z;
     }
-    love.graphics.setColor(255, 255, 255);
+    love.graphics.setColor(MAX_BRIGHTNESS, MAX_BRIGHTNESS, MAX_BRIGHTNESS);
   }
 }

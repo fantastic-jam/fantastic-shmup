@@ -31,9 +31,9 @@ function newEnemy() {
 love.load = () => {
   love.graphics.setDefaultFilter("nearest", "nearest");
   camera = new Camera();
-  starField = new StarField(camera, 5, 200);
+  starField = new StarField(camera, 200);
   spriteEngine = new SpriteEngine();
-  spriteEngine.addActor(new Ship(spriteEngine, new Vector2(300, 200)));
+  spriteEngine.addActor(new Ship(spriteEngine, new Vector2(100, 100)));
   for (let i = 0; i < enemyCount; i++) {
     newEnemy();
   }
