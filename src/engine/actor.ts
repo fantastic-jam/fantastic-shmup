@@ -1,4 +1,5 @@
 import { Screen } from "love.graphics";
+import { Collider2d } from "./collision/collider2d";
 import { SpriteEngine } from "./sprite-engine";
 import { Sprite } from "./sprite/sprite";
 import { Vector2 } from "./tools";
@@ -8,26 +9,17 @@ export class Actor {
     public spriteEngine: SpriteEngine,
     public pos: Vector2 = new Vector2(0, 0),
     public speed: number = 200,
-    public sprite: Sprite,
+    public sprite?: Sprite,
+    public collider?: Collider2d,
     public parent?: Actor
-  ) {}
+  ) {
+    if (collider) {
+      collider.setParent(this);
+    }
+  }
 
   update(dt: number) {
-    this.sprite.update(dt);
-  }
-
-  /**
-   * @deprecated
-   */
-  globalX(): number {
-    return this.pos.x + (this.parent ? this.parent.pos.x : 0);
-  }
-
-  /**
-   * @deprecated
-   */
-  globalY(): number {
-    return this.pos.y + (this.parent ? this.parent.pos.y : 0);
+    this.sprite?.update(dt);
   }
 
   globalPos(): Vector2 {
@@ -35,15 +27,6 @@ export class Actor {
   }
 
   draw(screen?: Screen) {
-    this.sprite.draw(this.pos, screen);
+    this.sprite?.draw(this.pos, screen);
   }
-
-  // translate() {
-  //     love.graphics.push();
-  //     love.graphics.translate(this.x, this.y);
-  // }
-
-  // endTranslate() {
-  //     love.graphics.pop();
-  // }
 }

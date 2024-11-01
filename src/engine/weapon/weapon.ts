@@ -12,7 +12,7 @@ export class Weapon extends Actor {
     public cooldown: number = 1,
     parent?: Actor
   ) {
-    super(spriteEngine, pos, 0, null, parent);
+    super(spriteEngine, pos, 0, undefined, undefined, parent);
   }
 
   fire() {
@@ -22,19 +22,12 @@ export class Weapon extends Actor {
     ) {
       this.lastFired = love.timer.getTime();
       this.spriteEngine.addActor(
-        new Projectile(
-          this.spriteEngine,
-          new Vector2(this.globalX(), this.globalY())
-        )
+        new Projectile(this.spriteEngine, Vector2.of(this.globalPos()))
       );
     }
   }
 
-  update(dt: number) {
-    // Update logic
-  }
+  update(dt: number) {}
 
-  draw() {
-    // Draw logic
-  }
+  draw() {}
 }

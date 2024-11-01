@@ -1,9 +1,11 @@
 import { Image } from "love.graphics";
 import { config } from "../../conf";
 import { Actor } from "../actor";
+import { BoxCollider2d } from "../collision/box-collider2d";
 import { Engine } from "../engine";
 import { SpriteEngine } from "../sprite-engine";
 import { AnimatedSprite } from "../sprite/animated-sprite";
+import { Rectangle, Vector2 } from "../tools";
 
 let image: Image;
 Engine.preload(() => {
@@ -13,7 +15,8 @@ Engine.preload(() => {
 export class Projectile extends Actor {
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 16, 16, 0.05);
-    super(spriteEngine, pos, 200, animatedSprite);
+    const collider = new BoxCollider2d(new Rectangle(5, 5, 10, 6));
+    super(spriteEngine, pos, 200, animatedSprite, collider);
   }
 
   update(dt: number) {
@@ -25,12 +28,9 @@ export class Projectile extends Actor {
 
     // check collisions
     for (const actor of this.spriteEngine.getActors()) {
-      if (
-        actor["kill"] &&
-        Math.abs(this.pos.x - actor.pos.x) <= 20 &&
-        Math.abs(this.pos.y - actor.pos.y) <= 20
-      ) {
-        actor["kill"]();
+      if (!actor.collider || (actor as any)["kill"] == undefined) continue;
+      if (this.collider?.collides(actor.collider)) {
+        (actor as any)["kill"]();
         this.spriteEngine.removeActor(this);
       }
     }

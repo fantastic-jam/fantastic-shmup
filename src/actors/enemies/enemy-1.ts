@@ -1,9 +1,11 @@
 import { Image } from "love.graphics";
 import { config } from "../../conf";
 import { Actor } from "../../engine/actor";
+import { BoxCollider2d } from "../../engine/collision/box-collider2d";
 import { Engine } from "../../engine/engine";
 import { SpriteEngine } from "../../engine/sprite-engine";
 import { AnimatedSprite } from "../../engine/sprite/animated-sprite";
+import { Rectangle, Vector2 } from "../../engine/tools";
 
 let image: Image;
 Engine.preload(() => {
@@ -13,7 +15,9 @@ Engine.preload(() => {
 export class Enemy1 extends Actor {
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
-    super(spriteEngine, pos, 200, animatedSprite);
+    const collider = new BoxCollider2d(new Rectangle(0, 8, 20, 17));
+
+    super(spriteEngine, pos, 200, animatedSprite, collider);
   }
 
   private getDir(): Vector2 {

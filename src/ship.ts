@@ -1,23 +1,25 @@
 import { Image } from "love.graphics";
 import { Actor } from "./engine/actor";
+import { BoxCollider2d } from "./engine/collision/box-collider2d";
 import { Engine } from "./engine/engine";
 import { Input } from "./engine/input/input";
 import { SpriteEngine } from "./engine/sprite-engine";
 import { AnimatedSprite } from "./engine/sprite/animated-sprite";
-import { Vector2 } from "./engine/tools";
+import { Rectangle, Vector2 } from "./engine/tools";
 import { Weapon } from "./engine/weapon/weapon";
 
 let image: Image;
 Engine.preload(() => {
-  image = love.graphics.newImage("/assets/ship.png")
-})
+  image = love.graphics.newImage("/assets/ship.png");
+});
 
 export class Ship extends Actor {
   weapon: Weapon;
 
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
-    super(spriteEngine, pos, 200, animatedSprite);
+    const collider = new BoxCollider2d(new Rectangle(17, 10, 21, 12));
+    super(spriteEngine, pos, 200, animatedSprite, collider);
 
     this.weapon = new Weapon(spriteEngine, new Vector2(30, 10), 0.15, this);
   }
@@ -50,6 +52,7 @@ export class Ship extends Actor {
         return true;
       }
     }
+    return false;
   }
 
   update(dt: number) {

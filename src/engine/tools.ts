@@ -21,3 +21,12 @@ export class Vector3 {
     return new Vector3(this.x + v.x, this.y + v.y, this.z + v.z);
   }
 }
+
+export class Rectangle {
+  constructor(
+    public x: number,
+    public y: number,
+    public w: number,
+    public h: number
+  ) {}
+}
