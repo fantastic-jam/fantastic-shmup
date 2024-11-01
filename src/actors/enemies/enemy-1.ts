@@ -15,11 +15,15 @@ Engine.preload(() => {
 export class Enemy1 extends Actor implements Damageable {
   private maxHealth = 100;
   private health = this.maxHealth;
+  private y = 0;
+  private randCos = 0;
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     const collider = new BoxCollider2d(new Rectangle(0, 8, 20, 17));
-
-    super(spriteEngine, pos, 200, animatedSprite, collider);
+    
+    super("Enemy", spriteEngine, pos, 200, animatedSprite, collider);
+    this.y = pos.y;
+    this.randCos = love.math.random(0, 500);
   }
 
   private getDir(): Vector2 {
@@ -31,10 +35,23 @@ export class Enemy1 extends Actor implements Damageable {
     const dir = this.getDir();
 
     this.pos.x += dir.x * this.speed * dt;
-    this.pos.y += dir.y * this.speed * dt;
+    this.pos.y = this.y + (Math.cos((this.randCos + this.pos.x) / 100) * 40);
 
     if (this.pos.x < 0 - 40) {
       this.respawn();
+    }
+
+    // check collisions
+    for (const actor of this.spriteEngine.getActors()) {
+      if (
+        actor.collider &&
+        (actor as unknown as Damageable).damage &&
+        actor.getType() === "Ship" &&
+        this.collider?.collides(actor.collider)
+      ) {
+        (actor as unknown as Damageable).damage(this, 20);
+        this.respawn();
+      }
     }
   }
 
@@ -42,6 +59,8 @@ export class Enemy1 extends Actor implements Damageable {
     this.health = this.maxHealth;
     this.pos.x = config.screenWidth;
     this.pos.y = love.math.random(config.screenHeight);
+    this.y = this.pos.y;
+    this.randCos = love.math.random(0, 500);
   }
 
   kill() {

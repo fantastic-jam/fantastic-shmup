@@ -10,6 +10,7 @@ export interface Damageable {
 
 export class Actor {
   constructor(
+    private type: string,
     public spriteEngine: SpriteEngine,
     public pos: Vector2 = new Vector2(0, 0),
     public speed = 200,
@@ -20,6 +21,10 @@ export class Actor {
     if (collider) {
       collider.setParent(this);
     }
+  }
+
+  getType():string {
+    return this.type;
   }
 
   update(dt: number) {

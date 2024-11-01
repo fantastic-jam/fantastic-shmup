@@ -1,12 +1,16 @@
 import { Image } from "love.graphics";
-import { Sprite } from "./sprite";
 import { Vector2 } from "../tools";
+import { Sprite } from "./sprite";
 
 export class SimpleSprite implements Sprite {
-  image: Image;
-
-  constructor(image: Image) {
+  constructor(private image: Image) {
     this.image = image;
+  }
+  getWidth(): number {
+    return this.image.getWidth();
+  }
+  getHeight(): number {
+    return this.image.getHeight();
   }
 
   draw(pos: Vector2) {

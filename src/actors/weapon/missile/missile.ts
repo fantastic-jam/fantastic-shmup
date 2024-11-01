@@ -16,7 +16,7 @@ export class Missile extends Actor {
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 16, 16, 0.05);
     const collider = new BoxCollider2d(new Rectangle(5, 5, 10, 6));
-    super(spriteEngine, pos, 200, animatedSprite, collider);
+    super("Missile", spriteEngine, pos, 200, animatedSprite, collider);
   }
 
   update(dt: number) {
@@ -31,6 +31,7 @@ export class Missile extends Actor {
       if (
         actor.collider &&
         (actor as unknown as Damageable).damage &&
+        (actor.getType() === "Enemy") &&
         this.collider?.collides(actor.collider)
       ) {
         (actor as unknown as Damageable).damage(this, 100);

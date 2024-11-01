@@ -41,8 +41,8 @@ export class AnimatedSprite implements Sprite {
 
   constructor(
     spritesheet: Image,
-    frameWidth: number,
-    frameHeight: number,
+    private frameWidth: number,
+    private frameHeight: number,
     animationSpeed: number
   ) {
     this.spritesheet = spritesheet;
@@ -52,6 +52,14 @@ export class AnimatedSprite implements Sprite {
     this.currentFrame = 0;
     this.animations = loadAnimations(spritesheet, frameWidth, frameHeight);
     this.elapsedTime = 0;
+  }
+
+  getWidth(): number {
+    return this.frameWidth;
+  }
+
+  getHeight(): number {
+    return this.frameHeight;
   }
 
   update(dt: number) {

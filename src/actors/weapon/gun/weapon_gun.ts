@@ -13,7 +13,7 @@ export class WeaponGun extends Actor implements Weapon {
     public cooldown = 0.5,
     parent?: Actor
   ) {
-    super(spriteEngine, pos, 0, undefined, undefined, parent);
+    super("WeaponGun", spriteEngine, pos, 0, undefined, undefined, parent);
   }
 
   fire(): void {
