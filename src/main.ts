@@ -9,6 +9,7 @@ import { StarField } from "./world/starfield";
 import { config } from "./conf";
 import { Camera } from "./engine/camera";
 import { Screen } from "love.graphics";
+import { Engine } from "./engine/engine";
 
 let spriteEngine: SpriteEngine;
 let starField: StarField;
@@ -30,6 +31,7 @@ function newEnemy() {
 
 love.load = () => {
   love.graphics.setDefaultFilter("nearest", "nearest");
+  Engine.load();
   camera = new Camera();
   starField = new StarField(camera, 200);
   spriteEngine = new SpriteEngine();

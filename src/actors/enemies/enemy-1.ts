@@ -1,13 +1,17 @@
+import { Image } from "love.graphics";
 import { config } from "../../conf";
 import { Actor } from "../../engine/actor";
-import { Input } from "../../engine/input/input";
+import { Engine } from "../../engine/engine";
 import { SpriteEngine } from "../../engine/sprite-engine";
 import { AnimatedSprite } from "../../engine/sprite/animated-sprite";
-import { Vector2 } from "../../engine/tools";
+
+let image: Image;
+Engine.preload(() => {
+  image = love.graphics.newImage("assets/enemy-1.png");
+});
 
 export class Enemy1 extends Actor {
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
-    const image = love.graphics.newImage("/assets/enemy-1.png");
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     super(spriteEngine, pos, 200, animatedSprite);
   }

@@ -1,12 +1,17 @@
+import { Image } from "love.graphics";
 import { config } from "../../conf";
 import { Actor } from "../actor";
+import { Engine } from "../engine";
 import { SpriteEngine } from "../sprite-engine";
 import { AnimatedSprite } from "../sprite/animated-sprite";
-import { Vector2 } from "../tools";
+
+let image: Image;
+Engine.preload(() => {
+  image = love.graphics.newImage("assets/ship-bullet.png");
+});
 
 export class Projectile extends Actor {
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
-    const image = love.graphics.newImage("assets/ship-bullet.png");
     const animatedSprite = new AnimatedSprite(image, 16, 16, 0.05);
     super(spriteEngine, pos, 200, animatedSprite);
   }
