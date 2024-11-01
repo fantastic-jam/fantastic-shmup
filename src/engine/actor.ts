@@ -12,7 +12,7 @@ export class Actor {
   constructor(
     public spriteEngine: SpriteEngine,
     public pos: Vector2 = new Vector2(0, 0),
-    public speed: number = 200,
+    public speed = 200,
     public sprite?: Sprite,
     public collider?: Collider2d,
     public parent?: Actor

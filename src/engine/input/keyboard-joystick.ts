@@ -123,7 +123,7 @@ export class KeyboardJoystick implements Joystick {
   isGamepad(): boolean {
     return false;
   }
-  isGamepadDown(...vararg: Array<GamepadButton>): boolean {
+  isGamepadDown(...vararg: GamepadButton[]): boolean {
     return vararg.some((button) =>
       love.keyboard.isScancodeDown(KeyboardJoystick.mapping[button])
     );

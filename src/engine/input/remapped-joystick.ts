@@ -94,7 +94,7 @@ export class RemappedJoystick implements Joystick {
     return this.delegate.isConnected();
   }
 
-  isDown(...vararg: Array<number>): boolean {
+  isDown(...vararg: number[]): boolean {
     return this.delegate.isDown(...vararg);
   }
 
@@ -102,7 +102,7 @@ export class RemappedJoystick implements Joystick {
     return this.delegate.isGamepad();
   }
 
-  isGamepadDown(...vararg: Array<GamepadButton>): boolean {
+  isGamepadDown(...vararg: GamepadButton[]): boolean {
     return this.delegate.isGamepadDown(...vararg);
   }
 

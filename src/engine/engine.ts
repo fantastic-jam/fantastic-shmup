@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Engine {
   private static loadCallbacks: (() => void)[] = [];
   public static preload<T>(cb: () => T): Promise<T> {

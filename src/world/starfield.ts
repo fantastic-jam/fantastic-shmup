@@ -16,7 +16,7 @@ const DEPTH_SIZE_RATIO = 0.03;
 export class StarField {
   private stars: Star[] = [];
 
-  constructor(private camera: Camera, public starCount: number = 600) {
+  constructor(private camera: Camera, public starCount = 600) {
     for (let i = 0; i < starCount; i++) {
       const star = new Star(
         new Vector3(

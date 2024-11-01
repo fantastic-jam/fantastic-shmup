@@ -9,7 +9,7 @@ export class Weapon extends Actor {
   constructor(
     spriteEngine: SpriteEngine,
     pos: Vector2,
-    public cooldown: number = 1,
+    public cooldown = 1,
     parent?: Actor
   ) {
     super(spriteEngine, pos, 0, undefined, undefined, parent);

@@ -2,9 +2,10 @@ import { Joystick } from "love.joystick";
 import { KeyboardJoystick } from "./keyboard-joystick";
 import { RemappedJoystick } from "./remapped-joystick";
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Input {
   private static keyboard = new KeyboardJoystick();
-  private static lovePotionGamepads = {
+  private static lovePotionGamepads: Record<string, string> = {
     "{B58A259A-13AA-46E0-BDCB-31898EDAB24E}": "NINTENDO_3DS",
     "{7BC9702D-7D81-4EBB-AD4F-8C94076588D5}": "NEW_NINTENDO_3DS",
     "{6EBE242C-820F-46E1-9A66-DC8200686D51}": "NINTENDO_SWITCH_HANDHELD",
@@ -18,6 +19,10 @@ export class Input {
     "{B4F6A311-8228-477D-857B-B875D891C46D}": "WII_CLASSIC",
     "{36895D3B-A724-4F46-994C-64BCE736EBCB}": "WII_PRO",
   };
+
+  static hasKeyboard(): boolean {
+    return !!love.keyboard.isScancodeDown;
+  }
 
   static remapJoysticks(joysticks: Joystick[]): Joystick[] {
     return joysticks.map((j) => {
@@ -34,7 +39,7 @@ export class Input {
   }
 
   static getJoysticks(): Joystick[] {
-    if (love.keyboard?.isScancodeDown) {
+    if (Input.hasKeyboard()) {
       return [this.keyboard, ...love.joystick.getJoysticks()];
     }
     return this.remapJoysticks(love.joystick.getJoysticks());

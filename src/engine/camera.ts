@@ -6,7 +6,7 @@ export class Camera {
   constructor(
     public pos: Vector2 = new Vector2(0, 0),
     scale?: number,
-    public speed: number = 200
+    public speed = 200
   ) {
     if (scale == null) {
       // automatic scale

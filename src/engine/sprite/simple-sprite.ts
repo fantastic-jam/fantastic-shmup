@@ -13,5 +13,7 @@ export class SimpleSprite implements Sprite {
     love.graphics.draw(this.image, pos.x, pos.y);
   }
 
-  update(): void {}
+  update(): void {
+    // do nothing
+  }
 }
