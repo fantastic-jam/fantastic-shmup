@@ -14,4 +14,6 @@ love.conf = (config) => {
 export const customInputMappings = {
   fire: "a",
   missile: "b",
+  weapon_up: "rightshoulder",
+  weapon_down: "leftshoulder",
 };

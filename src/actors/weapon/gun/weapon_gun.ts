@@ -1,28 +1,29 @@
-import { Actor } from "../actor";
-import { SpriteEngine } from "../sprite-engine";
-import { Vector2 } from "../tools";
-import { Projectile } from "./projectile";
+import { Actor } from "../../../engine/actor";
+import { SpriteEngine } from "../../../engine/sprite-engine";
+import { Vector2 } from "../../../engine/tools";
+import { Weapon } from "../weapon";
+import { Bullet } from "./bullet";
 
-export class Weapon extends Actor {
+export class WeaponGun extends Actor implements Weapon {
   lastFired?: number = undefined;
 
   constructor(
     spriteEngine: SpriteEngine,
     pos: Vector2,
-    public cooldown = 1,
+    public cooldown = 0.5,
     parent?: Actor
   ) {
     super(spriteEngine, pos, 0, undefined, undefined, parent);
   }
 
-  fire() {
+  fire(): void {
     if (
       !this.lastFired ||
       love.timer.getTime() > this.lastFired + this.cooldown
     ) {
       this.lastFired = love.timer.getTime();
       this.spriteEngine.addActor(
-        new Projectile(this.spriteEngine, Vector2.of(this.globalPos()))
+        new Bullet(this.spriteEngine, Vector2.of(this.globalPos()))
       );
     }
   }

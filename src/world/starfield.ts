@@ -66,7 +66,7 @@ export class StarField {
         star.pos.z * DEPTH_SIZE_RATIO * scale,
         star.pos.z * DEPTH_SIZE_RATIO * scale
       );
-      brightness = 200 + star.pos.z;
+      brightness = 0 + (star.pos.z/50);
     }
     love.graphics.setColor(MAX_BRIGHTNESS, MAX_BRIGHTNESS, MAX_BRIGHTNESS);
   }

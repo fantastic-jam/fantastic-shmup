@@ -7,7 +7,9 @@ import { InputActions } from "../engine/input/input";
 import { SpriteEngine } from "../engine/sprite-engine";
 import { AnimatedSprite } from "../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../engine/tools";
-import { Weapon } from "../engine/weapon/weapon";
+import { WeaponMissile } from "./weapon/missile/weapon_missile";
+import { Weapon } from "./weapon/weapon";
+import { WeaponGun } from "./weapon/gun/weapon_gun";
 
 let image: Image;
 Engine.preload(() => {
@@ -15,7 +17,8 @@ Engine.preload(() => {
 });
 
 export class Ship extends Actor {
-  weapon: Weapon;
+  weapons: Weapon[];
+  currentWeapon = 0;
 
   constructor(
     spriteEngine: SpriteEngine,
@@ -26,7 +29,10 @@ export class Ship extends Actor {
     const collider = new BoxCollider2d(new Rectangle(17, 10, 21, 12));
     super(spriteEngine, pos, 200, animatedSprite, collider);
 
-    this.weapon = new Weapon(spriteEngine, new Vector2(30, 10), 0.15, this);
+    this.weapons = [
+      new WeaponGun(spriteEngine, new Vector2(35, 13), 0.1, this),
+      new WeaponMissile(spriteEngine, new Vector2(30, 10), 0.4, this),
+    ];
   }
 
   private getDir(): { x: number; y: number } {
@@ -55,7 +61,7 @@ export class Ship extends Actor {
 
   update(dt: number) {
     super.update(dt); // Call the parent class's update method
-    this.weapon.update(dt);
+    this.weapons[this.currentWeapon].update(dt);
 
     const dir = this.getDir();
 
@@ -63,12 +69,24 @@ export class Ship extends Actor {
     this.pos.y += dir.y * this.speed * dt;
 
     if (this.isMainWeaponFiring()) {
-      this.weapon.fire();
+      this.weapons[this.currentWeapon].fire();
+    }
+
+    if (this.joystick.isActionDown("weapon_up")) {
+      this.currentWeapon = Math.abs(
+        (this.currentWeapon + 1) % this.weapons.length
+      );
+    }
+    if (this.joystick.isActionDown("weapon_down")) {
+      this.currentWeapon = Math.abs(
+        (this.currentWeapon - 1) % this.weapons.length
+      );
     }
   }
 
   draw() {
-    super.draw(); // Call the parent class's draw method
-    this.weapon.draw();
+    super.draw();
+    print(this.currentWeapon.toString());
+    this.weapons[this.currentWeapon].draw();
   }
 }

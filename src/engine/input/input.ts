@@ -43,6 +43,9 @@ export class Input {
   };
 
   static isNintendoGamepad(joystick: Joystick) {
+    if (!joystick.getGUID) {
+      return true;
+    }
     return !!Input.nintendoGamepads[joystick.getGUID()];
   }
 

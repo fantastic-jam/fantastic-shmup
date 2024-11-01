@@ -13,7 +13,8 @@ Engine.preload(() => {
 });
 
 export class Enemy1 extends Actor implements Damageable {
-  private health = 100;
+  private maxHealth = 100;
+  private health = this.maxHealth;
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     const collider = new BoxCollider2d(new Rectangle(0, 8, 20, 17));
@@ -38,6 +39,7 @@ export class Enemy1 extends Actor implements Damageable {
   }
 
   respawn() {
+    this.health = this.maxHealth;
     this.pos.x = config.screenWidth;
     this.pos.y = love.math.random(config.screenHeight);
   }
