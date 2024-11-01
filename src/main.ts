@@ -2,7 +2,7 @@ import { Source } from "love.audio";
 import "./conf";
 import { SpriteEngine } from "./engine/sprite-engine";
 import { Vector2 } from "./engine/tools";
-import { Ship } from "./ship";
+import { Ship } from "./actors/ship";
 
 import { Enemy1 } from "./actors/enemies/enemy-1";
 import { StarField } from "./world/starfield";
@@ -14,7 +14,7 @@ import { Engine } from "./engine/engine";
 let spriteEngine: SpriteEngine;
 let starField: StarField;
 let music: Source;
-let enemyCount = 10;
+const enemyCount = 10;
 let camera;
 
 function newEnemy() {

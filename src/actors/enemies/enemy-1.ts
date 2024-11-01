@@ -1,6 +1,6 @@
 import { Image } from "love.graphics";
 import { config } from "../../conf";
-import { Actor } from "../../engine/actor";
+import { Actor, Damageable } from "../../engine/actor";
 import { BoxCollider2d } from "../../engine/collision/box-collider2d";
 import { Engine } from "../../engine/engine";
 import { SpriteEngine } from "../../engine/sprite-engine";
@@ -12,7 +12,7 @@ Engine.preload(() => {
   image = love.graphics.newImage("assets/enemy-1.png");
 });
 
-export class Enemy1 extends Actor {
+export class Enemy1 extends Actor implements Damageable {
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     const collider = new BoxCollider2d(new Rectangle(0, 8, 20, 17));
@@ -45,7 +45,12 @@ export class Enemy1 extends Actor {
     this.respawn();
   }
 
-  damage(src: Actor | undefined, damage: number) {
+  damage(src: Actor | undefined, amount: number) {
+    print(
+      src
+        ? `${src} gave ${this} ${amount} damage`
+        : `${this} took ${amount} damage`
+    );
     this.kill();
   }
 

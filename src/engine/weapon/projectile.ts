@@ -1,6 +1,6 @@
 import { Image } from "love.graphics";
 import { config } from "../../conf";
-import { Actor } from "../actor";
+import { Actor, Damageable } from "../actor";
 import { BoxCollider2d } from "../collision/box-collider2d";
 import { Engine } from "../engine";
 import { SpriteEngine } from "../sprite-engine";
@@ -28,9 +28,12 @@ export class Projectile extends Actor {
 
     // check collisions
     for (const actor of this.spriteEngine.getActors()) {
-      if (!actor.collider || (actor as any)["kill"] == undefined) continue;
-      if (this.collider?.collides(actor.collider)) {
-        (actor as any)["kill"]();
+      if (
+        actor.collider &&
+        (actor as unknown as Damageable).damage &&
+        this.collider?.collides(actor.collider)
+      ) {
+        (actor as unknown as Damageable).damage(this, Number.MAX_VALUE);
         this.spriteEngine.removeActor(this);
       }
     }

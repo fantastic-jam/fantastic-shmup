@@ -1,12 +1,12 @@
 import { Image } from "love.graphics";
-import { Actor } from "./engine/actor";
-import { BoxCollider2d } from "./engine/collision/box-collider2d";
-import { Engine } from "./engine/engine";
-import { Input } from "./engine/input/input";
-import { SpriteEngine } from "./engine/sprite-engine";
-import { AnimatedSprite } from "./engine/sprite/animated-sprite";
-import { Rectangle, Vector2 } from "./engine/tools";
-import { Weapon } from "./engine/weapon/weapon";
+import { Actor } from "../engine/actor";
+import { BoxCollider2d } from "../engine/collision/box-collider2d";
+import { Engine } from "../engine/engine";
+import { Input } from "../engine/input/input";
+import { SpriteEngine } from "../engine/sprite-engine";
+import { AnimatedSprite } from "../engine/sprite/animated-sprite";
+import { Rectangle, Vector2 } from "../engine/tools";
+import { Weapon } from "../engine/weapon/weapon";
 
 let image: Image;
 Engine.preload(() => {

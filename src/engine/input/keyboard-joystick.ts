@@ -35,7 +35,9 @@ export class KeyboardJoystick implements Joystick {
     y: "f",
   };
   getAxes(): LuaMultiReturn<number[]> {
-    return $multi(...KeyboardJoystick.axes.map(axis => this.getGamepadAxis(axis)));
+    return $multi(
+      ...KeyboardJoystick.axes.map((axis) => this.getGamepadAxis(axis))
+    );
   }
   getAxis(axis: number): number {
     if (axis >= KeyboardJoystick.axes.length) {
@@ -47,7 +49,7 @@ export class KeyboardJoystick implements Joystick {
     return 6;
   }
   getButtonCount(): number {
-    throw new Error("Method not implemented.");
+    return Object.keys(KeyboardJoystick.mapping).length;
   }
   getDeviceInfo(): LuaMultiReturn<
     [vendorID: number, productID: number, productVersion: number]
@@ -58,7 +60,7 @@ export class KeyboardJoystick implements Joystick {
     return "{cf6b8ee3-dec9-4122-93cc-e7b1ca46b008}";
   }
   getGamepadMappingString(): string | undefined {
-    throw new Error("Method not implemented.");
+    return undefined;
   }
   getGamepadAxis(axis: GamepadAxis): number {
     let result = 0;
@@ -88,9 +90,7 @@ export class KeyboardJoystick implements Joystick {
     }
     return result;
   }
-  getGamepadMapping(
-    axisOrButton: GamepadAxis | GamepadButton
-  ): LuaMultiReturn<
+  getGamepadMapping(): LuaMultiReturn<
     [
       inputType: JoystickInputType,
       inputIndex: number,
@@ -99,7 +99,7 @@ export class KeyboardJoystick implements Joystick {
   > {
     throw new Error("Method not implemented.");
   }
-  getHat(hat: number): JoystickHat {
+  getHat(): JoystickHat {
     throw new Error("Method not implemented.");
   }
   getHatCount(): number {
@@ -117,7 +117,7 @@ export class KeyboardJoystick implements Joystick {
   isConnected(): boolean {
     throw new Error("Method not implemented.");
   }
-  isDown(...vararg: Array<number>): boolean {
+  isDown(): boolean {
     throw new Error("Method not implemented.");
   }
   isGamepad(): boolean {
@@ -129,19 +129,19 @@ export class KeyboardJoystick implements Joystick {
     );
   }
   isVibrationSupported(): boolean {
-    throw new Error("Method not implemented.");
+    return false;
   }
-  setVibration(left?: unknown, right?: unknown, duration?: unknown): boolean {
-    throw new Error("Method not implemented.");
+  setVibration(): boolean {
+    return false;
   }
   " __opaque": never;
   release(): this is never {
     throw new Error("Method not implemented.");
   }
   type(): "Joystick" {
-    throw new Error("Method not implemented.");
+    return "Joystick";
   }
   typeOf<T extends keyof Types>(name: T): this is Types[T] {
-    throw new Error("Method not implemented.");
+    return name === "Joystick";
   }
 }

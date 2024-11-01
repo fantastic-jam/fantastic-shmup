@@ -4,6 +4,10 @@ import { SpriteEngine } from "./sprite-engine";
 import { Sprite } from "./sprite/sprite";
 import { Vector2 } from "./tools";
 
+export interface Damageable {
+  damage(src: Actor | undefined, amount: number): void;
+}
+
 export class Actor {
   constructor(
     public spriteEngine: SpriteEngine,

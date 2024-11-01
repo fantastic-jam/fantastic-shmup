@@ -1,14 +1,17 @@
-import { Sprite } from './sprite';
+import { Image } from "love.graphics";
+import { Sprite } from "./sprite";
+import { Vector2 } from "../tools";
 
-export class SimpleSprite extends Sprite {
-    image: any;
+export class SimpleSprite implements Sprite {
+  image: Image;
 
-    constructor(image: any) {
-        super(image.getWidth(), image.getHeight());
-        this.image = image;
-    }
+  constructor(image: Image) {
+    this.image = image;
+  }
 
-    draw(x: number, y: number) {
-        love.graphics.draw(this.image, x, y);
-    }
+  draw(pos: Vector2) {
+    love.graphics.draw(this.image, pos.x, pos.y);
+  }
+
+  update(): void {}
 }

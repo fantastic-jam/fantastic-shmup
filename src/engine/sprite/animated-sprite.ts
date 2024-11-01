@@ -1,18 +1,18 @@
-import { Screen } from "love.graphics";
+import { Image, Quad } from "love.graphics";
 import { Vector2 } from "../tools";
 import { Sprite } from "./sprite";
 
 function loadAnimations(
-  spritesheet: any,
+  spritesheet: Image,
   frameWidth: number,
   frameHeight: number
-): any[][] {
-  const result: any[][] = [];
+): Quad[][] {
+  const result: Quad[][] = [];
   const numAnimations = spritesheet.getHeight() / frameHeight;
   const numFrames = spritesheet.getWidth() / frameWidth;
 
   for (let i = 0; i < numAnimations; i++) {
-    const animation: any[] = [];
+    const animation: Quad[] = [];
     for (let j = 0; j < numFrames; j++) {
       animation.push(
         love.graphics.newQuad(
@@ -20,7 +20,8 @@ function loadAnimations(
           i * frameHeight,
           frameWidth,
           frameHeight,
-          spritesheet.getDimensions()
+          spritesheet.getWidth(),
+          spritesheet.getHeight()
         )
       );
     }
@@ -29,22 +30,21 @@ function loadAnimations(
   return result;
 }
 
-export class AnimatedSprite extends Sprite {
-  spritesheet: any;
+export class AnimatedSprite implements Sprite {
+  spritesheet: Image;
   animationSpeed: number;
   currentAnimationSpeed: number;
   currentAnimation: number;
   currentFrame: number;
-  animations: any[][];
+  animations: Quad[][];
   elapsedTime: number;
 
   constructor(
-    spritesheet: any,
+    spritesheet: Image,
     frameWidth: number,
     frameHeight: number,
     animationSpeed: number
   ) {
-    super(spritesheet.getWidth(), spritesheet.getHeight());
     this.spritesheet = spritesheet;
     this.animationSpeed = animationSpeed;
     this.currentAnimationSpeed = animationSpeed;
@@ -63,7 +63,7 @@ export class AnimatedSprite extends Sprite {
     }
   }
 
-  draw(pos: Vector2, screen?: Screen) {
+  draw(pos: Vector2) {
     love.graphics.draw(
       this.spritesheet,
       this.animations[this.currentAnimation][this.currentFrame],

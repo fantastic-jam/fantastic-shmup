@@ -26,8 +26,4 @@ export class Weapon extends Actor {
       );
     }
   }
-
-  update(dt: number) {}
-
-  draw() {}
 }

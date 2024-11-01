@@ -30,7 +30,6 @@ export class StarField {
   }
 
   public update(dt: number) {
-    const scale = this.camera.scale ?? 1;
     for (const star of this.stars) {
       star.pos.x = star.pos.x - STAR_SPEED * star.pos.z * dt;
       if (star.pos.x < 0) {

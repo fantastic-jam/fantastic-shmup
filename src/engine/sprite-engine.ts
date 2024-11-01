@@ -1,7 +1,6 @@
 import { Screen } from "love.graphics";
 import { Actor } from "./actor";
 import { Camera } from "./camera";
-import { Input } from "./input/input";
 
 export class SpriteEngine {
   private actors: Actor[] = [];
@@ -10,7 +9,7 @@ export class SpriteEngine {
     this.actors = [];
   }
 
-  getActors(){
+  getActors() {
     return [...this.actors];
   }
 
@@ -28,14 +27,14 @@ export class SpriteEngine {
     } else if (love.keyboard.isDown && love.keyboard.isDown("kp-")) {
       this.camera.scale += this.camera.speed * dt * 0.001;
     }
-    for (let actor of this.actors) {
+    for (const actor of this.actors) {
       actor.update(dt);
     }
   }
 
   draw(screen?: Screen) {
     this.camera.set();
-    for (let actor of this.actors) {
+    for (const actor of this.actors) {
       actor.draw(screen);
     }
     this.camera.unset();
