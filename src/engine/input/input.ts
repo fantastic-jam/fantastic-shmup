@@ -5,7 +5,7 @@ import { KeyboardJoystick } from "./keyboard-joystick";
 import { RemappedJoystick } from "./remapped-joystick";
 
 function isNintendoOs(): boolean {
-  return (love.system.getOS() as string) === "Nintendo";
+  return (love.system.getOS() as string) === "Horizon";
 }
 
 const standardMappings = {

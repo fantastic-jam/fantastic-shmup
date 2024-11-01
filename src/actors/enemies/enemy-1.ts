@@ -13,6 +13,7 @@ Engine.preload(() => {
 });
 
 export class Enemy1 extends Actor implements Damageable {
+  private health = 100;
   constructor(spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     const collider = new BoxCollider2d(new Rectangle(0, 8, 20, 17));
@@ -45,13 +46,11 @@ export class Enemy1 extends Actor implements Damageable {
     this.respawn();
   }
 
-  damage(src: Actor | undefined, amount: number) {
-    print(
-      src
-        ? `${src} gave ${this} ${amount} damage`
-        : `${this} took ${amount} damage`
-    );
-    this.kill();
+  damage(_src: Actor | undefined, amount: number) {
+    this.health = Math.max(this.health - amount, 0);
+    if (this.health === 0) {
+      this.kill();
+    }
   }
 
   draw() {
