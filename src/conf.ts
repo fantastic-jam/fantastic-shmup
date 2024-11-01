@@ -10,3 +10,8 @@ love.conf = (config) => {
   config.window.title = "fantastic shmup";
   config.window.vsync = 1;
 };
+
+export const customInputMappings = {
+  fire: "a",
+  missile: "b",
+};

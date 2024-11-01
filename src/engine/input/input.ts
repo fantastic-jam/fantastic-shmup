@@ -1,11 +1,33 @@
-import { Joystick } from "love.joystick";
+import { GamepadButton, Joystick } from "love.joystick";
+import { customInputMappings } from "../../conf";
+import { ExtendedJoystick } from "./extended-joystick";
 import { KeyboardJoystick } from "./keyboard-joystick";
 import { RemappedJoystick } from "./remapped-joystick";
+
+function isNintendoOs(): boolean {
+  return (love.system.getOS() as string) === "Nintendo";
+}
+
+const standardMappings = {
+  confirm: "b",
+  cancel: "a",
+};
+
+const nintendoMappings = {
+  confirm: "b",
+  cancel: "a",
+};
+
+export type InputActions =
+  | keyof typeof standardMappings
+  | keyof typeof customInputMappings;
+export type GamepadActionMappings = Record<InputActions, GamepadButton>;
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Input {
   private static keyboard = new KeyboardJoystick();
-  private static lovePotionGamepads: Record<string, string> = {
+  private static joysticks: ExtendedJoystick<string>[] = [];
+  private static nintendoGamepads: Record<string, string> = {
     "{B58A259A-13AA-46E0-BDCB-31898EDAB24E}": "NINTENDO_3DS",
     "{7BC9702D-7D81-4EBB-AD4F-8C94076588D5}": "NEW_NINTENDO_3DS",
     "{6EBE242C-820F-46E1-9A66-DC8200686D51}": "NINTENDO_SWITCH_HANDHELD",
@@ -20,28 +42,58 @@ export class Input {
     "{36895D3B-A724-4F46-994C-64BCE736EBCB}": "WII_PRO",
   };
 
+  static isNintendoGamepad(joystick: Joystick) {
+    return !!Input.nintendoGamepads[joystick.getGUID()];
+  }
+
   static hasKeyboard(): boolean {
     return !!love.keyboard.isScancodeDown;
   }
 
-  static remapJoysticks(joysticks: Joystick[]): Joystick[] {
-    return joysticks.map((j) => {
-      if (Input.lovePotionGamepads[j.getGUID()]) {
-        return new RemappedJoystick(j, {
-          axis: {
-            lefty: { axis: "lefty", inverse: true },
-            righty: { axis: "righty", inverse: true },
-          },
-        });
-      }
-      return j;
-    });
+  private static remapJoystick(joystick: Joystick): Joystick {
+    if (Input.isNintendoGamepad(joystick)) {
+      return new RemappedJoystick(joystick, {
+        axes: {
+          lefty: { axis: "lefty", inverse: true },
+          righty: { axis: "righty", inverse: true },
+        },
+        buttons: {
+          a: "b",
+          b: "a",
+          x: "y",
+          y: "x",
+        },
+      });
+    }
+    return joystick;
   }
 
-  static getJoysticks(): Joystick[] {
+  static extendJoystick(
+    joystick: Joystick,
+    mappings: GamepadActionMappings
+  ): ExtendedJoystick<InputActions> {
+    return new ExtendedJoystick(joystick, mappings);
+  }
+
+  static getJoysticks(): ExtendedJoystick<InputActions>[] {
+    return Input.joysticks;
+  }
+
+  static init(): void {
+    const gamepadActionMappings = {
+      ...(isNintendoOs() ? nintendoMappings : standardMappings),
+      ...customInputMappings,
+    };
+
+    const joysticks = love.joystick
+      .getJoysticks()
+      .map((j) => this.remapJoystick(j));
+
     if (Input.hasKeyboard()) {
-      return [this.keyboard, ...love.joystick.getJoysticks()];
+      joysticks.push(Input.keyboard);
     }
-    return this.remapJoysticks(love.joystick.getJoysticks());
+    this.joysticks = joysticks.map((j) =>
+      this.extendJoystick(j, gamepadActionMappings as GamepadActionMappings)
+    );
   }
 }

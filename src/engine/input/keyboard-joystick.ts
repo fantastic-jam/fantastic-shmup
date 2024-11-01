@@ -20,7 +20,7 @@ export class KeyboardJoystick implements Joystick {
   private static mapping: Record<GamepadButton, Scancode> = {
     a: "space",
     b: "g",
-    back: "space",
+    back: "escape",
     dpdown: "down",
     dpleft: "left",
     dpright: "right",
@@ -124,6 +124,7 @@ export class KeyboardJoystick implements Joystick {
     return false;
   }
   isGamepadDown(...vararg: GamepadButton[]): boolean {
+    print("isGamepadDown", vararg.join(','))
     return vararg.some((button) =>
       love.keyboard.isScancodeDown(KeyboardJoystick.mapping[button])
     );

@@ -1,15 +1,17 @@
 import { Source } from "love.audio";
+import { Ship } from "./actors/ship";
 import "./conf";
 import { SpriteEngine } from "./engine/sprite-engine";
 import { Vector2 } from "./engine/tools";
-import { Ship } from "./actors/ship";
 
+import { Screen } from "love.graphics";
+import { Joystick } from "love.joystick";
 import { Enemy1 } from "./actors/enemies/enemy-1";
-import { StarField } from "./world/starfield";
 import { config } from "./conf";
 import { Camera } from "./engine/camera";
-import { Screen } from "love.graphics";
 import { Engine } from "./engine/engine";
+import { Input } from "./engine/input/input";
+import { StarField } from "./world/starfield";
 
 let spriteEngine: SpriteEngine;
 let starField: StarField;
@@ -30,12 +32,12 @@ function newEnemy() {
 }
 
 love.load = () => {
+  Input.init();
   love.graphics.setDefaultFilter("nearest", "nearest");
   Engine.load();
   camera = new Camera();
   starField = new StarField(camera, 200);
   spriteEngine = new SpriteEngine();
-  spriteEngine.addActor(new Ship(spriteEngine, new Vector2(100, 100)));
   for (let i = 0; i < enemyCount; i++) {
     newEnemy();
   }
@@ -45,11 +47,21 @@ love.load = () => {
   music.play();
 };
 
+const ships = new Map<Joystick, Ship>();
 love.update = (dt) => {
+  for (const joystick of Input.getJoysticks()) {
+    if (joystick.isGamepadDown("start") && ships.get(joystick) == null) {
+      const ship = new Ship(spriteEngine, new Vector2(100, 100), joystick);
+      spriteEngine.addActor(ship);
+      ships.set(joystick, ship);
+    }
+    if (joystick.isGamepadDown("back")) {
+      love.event.quit(0);
+    }
+  }
   starField.update(dt);
   spriteEngine.update(dt);
 };
-
 
 love.draw = (screen?: Screen) => {
   if (screen !== "bottom") {

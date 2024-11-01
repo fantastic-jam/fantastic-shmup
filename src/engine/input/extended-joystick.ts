@@ -12,14 +12,15 @@ export interface JoystickAxisRemap {
   inverse: boolean;
 }
 
-export class RemappedJoystick implements Joystick {
+export class ExtendedJoystick<T extends string> implements Joystick {
   public constructor(
     private delegate: Joystick,
-    private remaps: {
-      axes?: Partial<Record<GamepadAxis, JoystickAxisRemap>>;
-      buttons?: Partial<Record<GamepadButton, GamepadButton>>;
-    }
+    private mapping: Record<T, GamepadButton>
   ) {}
+
+  isActionDown(...actions: T[]): boolean {
+    return this.isGamepadDown(...actions.map((action) => this.mapping[action]));
+  }
 
   getAxes(): LuaMultiReturn<number[]> {
     return this.delegate.getAxes();
@@ -52,12 +53,6 @@ export class RemappedJoystick implements Joystick {
   }
 
   getGamepadAxis(axis: GamepadAxis): number {
-    const remap = this.remaps.axes?.[axis];
-    if (remap) {
-      return (
-        this.delegate.getGamepadAxis(remap.axis) * (remap.inverse ? -1 : 1)
-      );
-    }
     return this.delegate.getGamepadAxis(axis);
   }
 
@@ -106,18 +101,7 @@ export class RemappedJoystick implements Joystick {
   }
 
   isGamepadDown(...vararg: GamepadButton[]): boolean {
-    if (this.remaps.buttons == null) {
-      return this.delegate.isGamepadDown(...vararg);
-    }
-    return this.delegate.isGamepadDown(
-      ...vararg.map((button) => {
-        const remap = this.remaps.buttons?.[button];
-        if (remap) {
-          return remap;
-        }
-        return button;
-      })
-    );
+    return this.delegate.isGamepadDown(...vararg);
   }
 
   isVibrationSupported(): boolean {
