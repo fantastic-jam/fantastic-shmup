@@ -8,7 +8,7 @@ export class Star {
 }
 
 const STAR_MAX_DEPTH = 50;
-const MAX_BRIGHTNESS = 255;
+const MAX_BRIGHTNESS = 1;
 const STAR_SPEED = 2;
 const STEREOSCOPIC_EFFECT = 0.5;
 const DEPTH_SIZE_RATIO = 0.03;
