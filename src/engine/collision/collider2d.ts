@@ -10,4 +10,14 @@ export interface Collider2d {
   getType(): ColliderType;
   collides(collider: Collider2d): boolean;
   colliders(colliders: Collider2d[]): Collider2d[];
+
+  /**
+   * get layers this collider is on
+   */
+  getCollisionLayers(): readonly number[];
+
+  /**
+   * get the layers this colliders checks collisions with
+   */
+  getCollisionMask(): readonly number[];
 }

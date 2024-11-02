@@ -11,7 +11,14 @@ function collides(a: Rectangle, b: Rectangle): boolean {
 
 export class BoxCollider2d implements Collider2d {
   private parent?: Actor;
-  constructor(private box: Rectangle) {}
+  constructor(
+    private readonly box: Rectangle,
+    private readonly collisionLayers: readonly number[],
+    private readonly collisionMask: readonly number[]
+  ) {
+    this.collisionLayers = collisionLayers;
+    this.collisionMask = collisionMask;
+  }
 
   getParent(): Actor {
     if (!this.parent) {
@@ -31,7 +38,22 @@ export class BoxCollider2d implements Collider2d {
   getType(): "box" {
     return "box";
   }
+
+  getCollisionLayers(): readonly number[] {
+    return this.collisionLayers;
+  }
+  getCollisionMask(): readonly number[] {
+    return this.collisionMask;
+  }
+
   collides(collider: Collider2d): boolean {
+    if (
+      !collider
+        .getCollisionLayers()
+        .some((layer) => this.getCollisionMask().includes(layer))
+    ) {
+      return false;
+    }
     if (collider.getType() !== "box") {
       throw new Error(`Incompatible collider : ${collider.getType()}`);
     }

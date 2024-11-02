@@ -11,6 +11,7 @@ import { Rectangle, Vector2 } from "../engine/tools";
 import { WeaponGun } from "./weapon/gun/weapon_gun";
 import { WeaponMissile } from "./weapon/missile/weapon_missile";
 import { Weapon } from "./weapon/weapon";
+import { CollisionLayer } from "../collisions";
 
 let image: Image;
 Engine.preload(() => {
@@ -30,7 +31,11 @@ export class Ship extends Actor implements Damageable {
     private joystick: ExtendedJoystick<InputActions>
   ) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
-    const collider = new BoxCollider2d(new Rectangle(17, 10, 21, 12));
+    const collider = new BoxCollider2d(
+      new Rectangle(17, 10, 21, 12),
+      [CollisionLayer.PLAYERS],
+      [CollisionLayer.ENEMIES]
+    );
     super("Ship", spriteEngine, pos, 200, animatedSprite, collider);
 
     this.weapons = [
