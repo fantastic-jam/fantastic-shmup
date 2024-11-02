@@ -1,8 +1,11 @@
 import { Screen } from "love.graphics";
 
+import { config } from "./conf";
+import { Engine } from "./engine/engine";
+import { Input } from "./engine/input/input";
 import { Scene } from "./engine/scene";
 import { GameScene } from "./scenes/game";
-import { config } from "./conf";
+import { MenuScene } from "./scenes/menu";
 
 let scene: Scene;
 let scale: number;
@@ -13,7 +16,16 @@ love.load = () => {
     love.graphics.getWidth() / config.screenWidth,
     love.graphics.getHeight() / config.screenHeight
   );
-  scene = new GameScene();
+  Input.init();
+  Engine.load();
+
+  const menuScene = new MenuScene();
+  menuScene.listen("start", (event) => {
+    event.getSource().unload();
+    const joysticks = event.getSource().getPlayers();
+    scene = new GameScene(joysticks);
+  });
+  scene = menuScene;
 };
 
 love.update = (dt) => {

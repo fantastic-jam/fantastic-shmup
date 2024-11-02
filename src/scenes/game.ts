@@ -1,16 +1,16 @@
 import { Source } from "love.audio";
+import { Screen } from "love.graphics";
+import { Joystick } from "love.joystick";
 import { Enemy1 } from "../actors/enemies/enemy-1";
+import { Ship } from "../actors/ship";
 import { config } from "../conf";
 import { Camera } from "../engine/camera";
-import { Engine } from "../engine/engine";
-import { Input } from "../engine/input/input";
+import { ExtendedJoystick } from "../engine/input/extended-joystick";
+import { InputActions } from "../engine/input/input";
 import { Scene } from "../engine/scene";
 import { SpriteEngine } from "../engine/sprite-engine";
 import { Vector2 } from "../engine/tools";
 import { StarField } from "../world/starfield";
-import { Joystick } from "love.joystick";
-import { Ship } from "../actors/ship";
-import { Screen } from "love.graphics";
 
 export class GameScene implements Scene {
   spriteEngine: SpriteEngine;
@@ -31,11 +31,9 @@ export class GameScene implements Scene {
     );
   }
 
-  constructor() {
+  constructor(private players: ExtendedJoystick<InputActions>[]) {
     const enemyCount = 10;
 
-    Input.init();
-    Engine.load();
     this.camera = new Camera();
     this.starField = new StarField(this.camera, 200);
     this.spriteEngine = new SpriteEngine();
@@ -46,10 +44,22 @@ export class GameScene implements Scene {
     this.music.setLooping(true);
     this.music.setVolume(0.2);
     this.music.play();
+    for (const joystick of players) {
+      const ship = new Ship(this.spriteEngine, new Vector2(100, 100), joystick);
+      this.spriteEngine.addActor(ship);
+      this.ships.set(joystick, ship);
+      ship.listen("killed", () => {
+        const ship = this.ships.get(joystick);
+        if (ship) {
+          this.spriteEngine.removeActor(ship);
+          this.ships.delete(joystick);
+        }
+      });
+    }
   }
 
   update(dt: number): void {
-    for (const joystick of Input.getJoysticks()) {
+    for (const joystick of this.players) {
       if (joystick.isGamepadDown("start") && this.ships.get(joystick) == null) {
         const ship = new Ship(
           this.spriteEngine,
