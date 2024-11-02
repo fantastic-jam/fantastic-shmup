@@ -11,7 +11,7 @@ export class WeaponMissile extends Actor implements Weapon {
     spriteEngine: SpriteEngine,
     pos: Vector2,
     public cooldown = 3,
-    parent?: Actor
+    parent: Actor
   ) {
     super("WeaponMissile", spriteEngine, pos, 0, undefined, undefined, parent);
   }
@@ -23,7 +23,7 @@ export class WeaponMissile extends Actor implements Weapon {
     ) {
       this.lastFired = love.timer.getTime();
       this.spriteEngine.addActor(
-        new Missile(this.spriteEngine, Vector2.of(this.globalPos()))
+        new Missile(this.spriteEngine, Vector2.of(this.globalPos()), this.parent ?? this)
       );
     }
   }

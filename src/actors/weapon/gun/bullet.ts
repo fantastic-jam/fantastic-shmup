@@ -14,14 +14,14 @@ Engine.preload(() => {
 });
 
 export class Bullet extends Actor {
-  constructor(spriteEngine: SpriteEngine, pos: Vector2) {
+  constructor(spriteEngine: SpriteEngine, pos: Vector2, parent: Actor) {
     const animatedSprite = new AnimatedSprite(image, 7, 7, 0.05);
     const collider = new BoxCollider2d(
       new Rectangle(0, 0, 7, 7),
       [CollisionLayer.PLAYERS],
       [CollisionLayer.ENEMIES]
     );
-    super("Bullet", spriteEngine, pos, 200, animatedSprite, collider);
+    super("Bullet", spriteEngine, pos, 200, animatedSprite, collider, parent);
   }
 
   update(dt: number) {
@@ -38,7 +38,7 @@ export class Bullet extends Actor {
         (actor as unknown as Damageable).damage &&
         this.collider?.collides(actor.collider)
       ) {
-        (actor as unknown as Damageable).damage(this, 20);
+        (actor as unknown as Damageable).damage(this.parent, 20);
         this.spriteEngine.removeActor(this);
       }
     }

@@ -31,6 +31,9 @@ export class Ship
   weapons: Weapon[];
   currentWeapon = 0;
   private simpleEventEmitter = new SimpleEventEmitter<"killed", Ship>();
+  public score = 0;
+  public color: [number, number, number] = [1, 1, 1];
+
   constructor(
     spriteEngine: SpriteEngine,
     pos: Vector2,
@@ -60,12 +63,36 @@ export class Ship
     this.simpleEventEmitter.pushEvent(new SimpleEvent("killed", this));
   }
 
+  getScore(): number {
+    return this.score;
+  }
+
   private getDir(): { x: number; y: number } {
     let x = 0;
     let y = 0;
 
-    const axisX = this.joystick.getGamepadAxis("leftx");
-    const axisY = this.joystick.getGamepadAxis("lefty");
+    let axisX = this.joystick.getGamepadAxis("leftx");
+    let axisY = this.joystick.getGamepadAxis("lefty");
+
+    if (
+      this.joystick.isGamepadDown("dpleft") ||
+      this.joystick.isGamepadDown("dpright")
+    ) {
+      axisX =
+        0 +
+        (this.joystick.isGamepadDown("dpleft") ? -1 : 0) +
+        (this.joystick.isGamepadDown("dpright") ? 1 : 0);
+    }
+
+    if (
+      this.joystick.isGamepadDown("dpup") ||
+      this.joystick.isGamepadDown("dpdown")
+    ) {
+      axisY =
+        0 +
+        (this.joystick.isGamepadDown("dpup") ? -1 : 0) +
+        (this.joystick.isGamepadDown("dpdown") ? 1 : 0);
+    }
 
     if (Math.abs(axisX) > 0.2) {
       x = axisX;
@@ -121,7 +148,9 @@ export class Ship
   }
 
   draw() {
+    love.graphics.setColor(...this.color);
     super.draw();
     this.weapons[this.currentWeapon].draw();
+    love.graphics.setColor(1, 1, 1);
   }
 }

@@ -7,6 +7,7 @@ import { SpriteEngine } from "../../engine/sprite-engine";
 import { AnimatedSprite } from "../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../engine/tools";
 import { CollisionLayer } from "../../collisions";
+import { Ship } from "../ship";
 
 let image: Image;
 Engine.preload(() => {
@@ -53,6 +54,9 @@ export class Enemy1 extends Actor implements Damageable {
         (actor as unknown as Damageable).damage &&
         this.collider?.collides(actor.collider)
       ) {
+        if ((actor as unknown as Ship).score) {
+          (actor as unknown as Ship).score -= 1000;
+        }
         (actor as unknown as Damageable).damage(this, 20);
         this.respawn();
       }
@@ -71,9 +75,12 @@ export class Enemy1 extends Actor implements Damageable {
     this.respawn();
   }
 
-  damage(_src: Actor | undefined, amount: number) {
+  damage(src: Actor | undefined, amount: number) {
     this.health = Math.max(this.health - amount, 0);
     if (this.health === 0) {
+      if ((src as unknown as Ship).score) {
+        (src as unknown as Ship).score += 100;
+      }
       this.kill();
     }
   }

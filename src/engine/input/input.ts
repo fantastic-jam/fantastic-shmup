@@ -68,6 +68,20 @@ export class Input {
         },
       });
     }
+    if (joystick.getGUID() === "0300dafe830500006020000000000000") {
+      return new RemappedJoystick(joystick, {
+        axes: {
+          lefty: { axis: "righty", inverse: true },
+          righty: { axis: "lefty", inverse: true },
+        },
+        buttons: {
+          a: "b",
+          b: "a",
+          x: "y",
+          y: "x",
+        },
+      });
+    }
     return joystick;
   }
 

@@ -44,8 +44,10 @@ export class GameScene implements Scene {
     this.music.setLooping(true);
     this.music.setVolume(0.2);
     this.music.play();
+    let idx = 0;
     for (const joystick of players) {
       const ship = new Ship(this.spriteEngine, new Vector2(100, 100), joystick);
+      ship.color = GameScene.getShipColor(idx++);
       this.spriteEngine.addActor(ship);
       this.ships.set(joystick, ship);
       ship.listen("killed", () => {
@@ -58,7 +60,36 @@ export class GameScene implements Scene {
     }
   }
 
+  static getShipColor(playerIdx: number): [number, number, number] {
+    switch (playerIdx) {
+      case 0:
+        return [1, 1, 1]; // normal
+      case 1:
+        return [1, 1, 0.5]; // yellow
+      case 2:
+        return [0.5, 1, 0.3]; // green
+      case 3:
+        return [0.2, 0.6, 1]; // blue
+      default:
+        return [0.5, 0.4, 1]; // purple
+    }
+  }
+
+  drawScore(): void {
+    let idx = 0;
+    this.players.forEach((player) => {
+      const ship = this.ships.get(player);
+      love.graphics.setColor(...GameScene.getShipColor(idx));
+      love.graphics.print(
+        "" + (ship?.getScore() ?? 0),
+        10 + idx++ * 50,
+        config.screenHeight - 30
+      );
+    });
+  }
+
   update(dt: number): void {
+    let idx = 0;
     for (const joystick of this.players) {
       if (joystick.isGamepadDown("start") && this.ships.get(joystick) == null) {
         const ship = new Ship(
@@ -66,6 +97,7 @@ export class GameScene implements Scene {
           new Vector2(100, 100),
           joystick
         );
+        ship.color = GameScene.getShipColor(idx);
         this.spriteEngine.addActor(ship);
         this.ships.set(joystick, ship);
         ship.listen("killed", () => {
@@ -79,6 +111,7 @@ export class GameScene implements Scene {
       if (joystick.isGamepadDown("back")) {
         love.event.quit(0);
       }
+      idx++;
     }
     this.starField.update(dt);
     this.spriteEngine.update(dt);
@@ -87,6 +120,7 @@ export class GameScene implements Scene {
     if (screen !== "bottom") {
       this.starField.draw(screen);
       this.spriteEngine.draw(screen);
+      this.drawScore();
     }
   }
   unload(): void {

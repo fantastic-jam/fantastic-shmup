@@ -14,6 +14,7 @@ export class SpriteEngine {
   }
 
   addActor(actor: Actor) {
+    actor.spriteEngine = this;
     this.actors.push(actor);
   }
 

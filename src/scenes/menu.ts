@@ -1,5 +1,5 @@
 import { Source } from "love.audio";
-import { Screen } from "love.graphics";
+import { getColor, Screen } from "love.graphics";
 import { config } from "../conf";
 import {
   Event,
@@ -60,11 +60,11 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
   }
   draw(screen?: Screen): void {
     if (screen !== "bottom") {
-      this.starField.draw()
+      this.starField.draw();
       let idx = 0;
       this.joysticks.forEach((time) => {
         if (love.timer.getTime() - time < 1) {
-          love.graphics.setColor(0.6, 0.6, 0.5);
+          love.graphics.setColor(0.6, 0.6, 0.3);
         } else {
           love.graphics.setColor(1, 1, 1);
         }
