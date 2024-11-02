@@ -56,6 +56,7 @@ export class StarField {
 
     let brightness = MAX_BRIGHTNESS;
     for (const star of this.stars) {
+      brightness = star.pos.z/50;
       love.graphics.setColor(brightness, brightness, brightness);
       const layerDepth = STAR_MAX_DEPTH - star.pos.z;
 
@@ -66,7 +67,6 @@ export class StarField {
         star.pos.z * DEPTH_SIZE_RATIO * scale,
         star.pos.z * DEPTH_SIZE_RATIO * scale
       );
-      brightness = 0 + (star.pos.z/50);
     }
     love.graphics.setColor(MAX_BRIGHTNESS, MAX_BRIGHTNESS, MAX_BRIGHTNESS);
   }
