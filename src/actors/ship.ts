@@ -122,7 +122,6 @@ export class Ship
 
   draw() {
     super.draw();
-    print(this.currentWeapon.toString());
     this.weapons[this.currentWeapon].draw();
   }
 }
