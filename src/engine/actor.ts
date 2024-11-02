@@ -23,7 +23,7 @@ export class Actor {
     }
   }
 
-  getType():string {
+  getType(): string {
     return this.type;
   }
 

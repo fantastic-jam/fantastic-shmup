@@ -1,11 +1,24 @@
 // @ts-check
-
 import eslint from "@eslint/js";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import tseslint from "typescript-eslint";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   ...tseslint.configs.strict,
-  ...tseslint.configs.stylistic
+  ...tseslint.configs.stylisticTypeChecked,
+  { rules: { "no-continue": "error" } },
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
+  { ignores: ["eslint.config.mjs"] }
 );

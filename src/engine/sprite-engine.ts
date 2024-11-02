@@ -22,9 +22,9 @@ export class SpriteEngine {
   }
 
   update(dt: number) {
-    if (love.keyboard.isDown && love.keyboard.isDown("kp+")) {
+    if (love.keyboard.isDown?.("kp+")) {
       this.camera.scale -= this.camera.speed * dt * 0.001;
-    } else if (love.keyboard.isDown && love.keyboard.isDown("kp-")) {
+    } else if (love.keyboard.isDown?.("kp-")) {
       this.camera.scale += this.camera.speed * dt * 0.001;
     }
     for (const actor of this.actors) {

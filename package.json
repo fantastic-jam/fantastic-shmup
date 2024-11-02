@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tstl -p tsconfig.json",
     "build:watch": "tstl -p tsconfig.json --watch",
+    "lint": "eslint",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

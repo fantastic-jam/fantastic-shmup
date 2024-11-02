@@ -38,7 +38,8 @@ export class Ship extends Actor implements Damageable {
       new WeaponMissile(spriteEngine, new Vector2(30, 10), 0.4, this),
     ];
   }
-  damage(src: Actor | undefined, amount: number): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  damage(_src: Actor | undefined, _amount: number): void {
     Ship.onKill?.(this.joystick);
   }
 
