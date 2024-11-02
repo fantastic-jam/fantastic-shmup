@@ -1,4 +1,3 @@
-import { config } from "../conf";
 import { Vector2 } from "./tools";
 
 export class Camera {
@@ -9,11 +8,7 @@ export class Camera {
     public speed = 200
   ) {
     if (scale == null) {
-      // automatic scale
-      this.scale = Math.min(
-        love.graphics.getWidth() / config.screenWidth,
-        love.graphics.getHeight() / config.screenHeight
-      );
+      this.scale = 1;
     } else {
       this.scale = scale;
     }
