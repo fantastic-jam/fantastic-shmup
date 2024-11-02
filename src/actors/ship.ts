@@ -1,8 +1,15 @@
 import { Image } from "love.graphics";
+import { CollisionLayer } from "../collisions";
 import { config } from "../conf";
 import { Actor, Damageable } from "../engine/actor";
 import { BoxCollider2d } from "../engine/collision/box-collider2d";
 import { Engine } from "../engine/engine";
+import {
+  Event,
+  EventEmitter,
+  SimpleEvent,
+  SimpleEventEmitter,
+} from "../engine/event";
 import { ExtendedJoystick } from "../engine/input/extended-joystick";
 import { InputActions } from "../engine/input/input";
 import { SpriteEngine } from "../engine/sprite-engine";
@@ -11,24 +18,23 @@ import { Rectangle, Vector2 } from "../engine/tools";
 import { WeaponGun } from "./weapon/gun/weapon_gun";
 import { WeaponMissile } from "./weapon/missile/weapon_missile";
 import { Weapon } from "./weapon/weapon";
-import { CollisionLayer } from "../collisions";
 
 let image: Image;
 Engine.preload(() => {
   image = love.graphics.newImage("/assets/ship.png");
 });
 
-export class Ship extends Actor implements Damageable {
+export class Ship
+  extends Actor
+  implements Damageable, EventEmitter<"killed", Ship>
+{
   weapons: Weapon[];
   currentWeapon = 0;
-  public static onKill:
-    | ((j: ExtendedJoystick<InputActions>) => void)
-    | undefined;
-
+  private simpleEventEmitter = new SimpleEventEmitter<"killed", Ship>();
   constructor(
     spriteEngine: SpriteEngine,
     pos: Vector2,
-    private joystick: ExtendedJoystick<InputActions>
+    public readonly joystick: ExtendedJoystick<InputActions>
   ) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     const collider = new BoxCollider2d(
@@ -43,9 +49,15 @@ export class Ship extends Actor implements Damageable {
       new WeaponMissile(spriteEngine, new Vector2(30, 10), 0.4, this),
     ];
   }
+  listen(
+    eventType: "killed",
+    callback: (e: Event<"killed", Ship>) => void
+  ): void {
+    this.simpleEventEmitter.listen(eventType, callback);
+  }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   damage(_src: Actor | undefined, _amount: number): void {
-    Ship.onKill?.(this.joystick);
+    this.simpleEventEmitter.pushEvent(new SimpleEvent("killed", this));
   }
 
   private getDir(): { x: number; y: number } {

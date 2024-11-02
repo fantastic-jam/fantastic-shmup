@@ -47,24 +47,20 @@ love.load = () => {
   music.play();
 };
 
-
-// TODO: make an event system
-let deaths = 0;
 const ships = new Map<Joystick, Ship>();
-Ship.onKill = (joystick:Joystick) => {
-  const ship = ships.get(joystick);
-  if (ship) {
-    spriteEngine.removeActor(ship);
-    ships.delete(joystick);
-    deaths++;
-  }
-}
 love.update = (dt) => {
   for (const joystick of Input.getJoysticks()) {
     if (joystick.isGamepadDown("start") && ships.get(joystick) == null) {
       const ship = new Ship(spriteEngine, new Vector2(100, 100), joystick);
       spriteEngine.addActor(ship);
       ships.set(joystick, ship);
+      ship.listen("killed", () => {
+        const ship = ships.get(joystick);
+        if (ship) {
+          spriteEngine.removeActor(ship);
+          ships.delete(joystick);
+        }
+      });
     }
     if (joystick.isGamepadDown("back")) {
       love.event.quit(0);
@@ -78,6 +74,5 @@ love.draw = (screen?: Screen) => {
   if (screen !== "bottom") {
     starField.draw(screen);
     spriteEngine.draw(screen);
-    love.graphics.print(`morts: ${deaths}`, 10, 10);
   }
 };
