@@ -148,9 +148,11 @@ export class Ship
   }
 
   draw() {
-    love.graphics.setColor(...this.color);
+    love.graphics.setColor(...this.color) ;
+    love.graphics.rectangle("fill", this.pos.x + 21, this.pos.y + 11, 15, 6) ;
+    love.graphics.setBlendMode("alpha") ;
+    love.graphics.setColor(1, 1, 1);
     super.draw();
     this.weapons[this.currentWeapon].draw();
-    love.graphics.setColor(1, 1, 1);
   }
 }

@@ -69,7 +69,7 @@ export class GameScene implements Scene {
       case 2:
         return [0.5, 1, 0.3]; // green
       case 3:
-        return [0.2, 0.6, 1]; // blue
+        return [0.2, 0.2, 1]; // blue
       default:
         return [0.5, 0.4, 1]; // purple
     }

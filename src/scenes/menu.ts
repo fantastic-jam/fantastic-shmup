@@ -1,6 +1,7 @@
 import { Source } from "love.audio";
-import { getColor, Screen } from "love.graphics";
+import { Screen } from "love.graphics";
 import { config } from "../conf";
+import { Camera } from "../engine/camera";
 import {
   Event,
   EventEmitter,
@@ -11,7 +12,6 @@ import { ExtendedJoystick } from "../engine/input/extended-joystick";
 import { Input, InputActions } from "../engine/input/input";
 import { Scene } from "../engine/scene";
 import { StarField } from "../world/starfield";
-import { Camera } from "../engine/camera";
 
 export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
   music: Source;
