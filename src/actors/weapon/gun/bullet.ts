@@ -1,12 +1,12 @@
 import { Image } from "love.graphics";
+import { CollisionLayer } from "../../../collisions";
 import { config } from "../../../conf";
-import { Actor, Damageable, idGenerator } from "../../../engine/actor";
+import { Actor, Damageable } from "../../../engine/actor";
 import { BoxCollider2d } from "../../../engine/collision/box-collider2d";
 import { Engine } from "../../../engine/engine";
 import { SpriteEngine } from "../../../engine/sprite-engine";
 import { AnimatedSprite } from "../../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../../engine/tools";
-import { CollisionLayer } from "../../../collisions";
 import { GameNetEventTypes, network } from "../../../scenes/network";
 
 let image: Image;
@@ -56,16 +56,21 @@ export class Bullet extends Actor {
     }
 
     // check collisions
-    for (const actor of this.spriteEngine.getActors()) {
-      if (
-        actor.collider &&
-        (actor as unknown as Damageable).damage &&
-        this.collider?.collides(actor.collider)
-      ) {
-        if (!network.isClient()) {
+    if (!network.isClient()) {
+      for (const actor of this.spriteEngine.getActors()) {
+        if (
+          actor.collider &&
+          (actor as unknown as Damageable).isInvincible &&
+          !(actor as unknown as Damageable).isInvincible() &&
+          (actor as unknown as Damageable).damage &&
+          this.collider?.collides(actor.collider)
+        ) {
           (actor as unknown as Damageable).damage(this.parent, 20);
+          this.spriteEngine.removeActor(this);
+          if (network.isServer()) {
+            network.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          }
         }
-        this.spriteEngine.removeActor(this);
       }
     }
   }

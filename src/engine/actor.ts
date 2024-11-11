@@ -5,6 +5,7 @@ import { Sprite } from "./sprite/sprite";
 import { Vector2 } from "./tools";
 
 export interface Damageable {
+  isInvincible(): boolean;
   damage(src: Actor | undefined, amount: number): void;
 }
 

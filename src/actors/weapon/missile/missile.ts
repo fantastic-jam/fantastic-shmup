@@ -56,16 +56,20 @@ export class Missile extends Actor {
     }
 
     // check collisions
-    for (const actor of this.spriteEngine.getActors()) {
-      if (
-        actor.collider &&
-        (actor as unknown as Damageable).damage &&
-        this.collider?.collides(actor.collider)
-      ) {
-        if (!network.isClient()) {
+    if (!network.isClient()) {
+      for (const actor of this.spriteEngine.getActors()) {
+        if (
+          actor.collider &&
+          (actor as unknown as Damageable).isInvincible &&
+          !(actor as unknown as Damageable).isInvincible() &&
+          (actor as unknown as Damageable).damage &&
+          this.collider?.collides(actor.collider)
+        ) {
           (actor as unknown as Damageable).damage(this.parent, 100);
           this.spriteEngine.removeActor(this);
-          network.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          if (network.isServer()) {
+            network.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          }
         }
       }
     }

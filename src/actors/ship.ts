@@ -4,7 +4,12 @@ import { config } from "../conf";
 import { Actor, Damageable, idGenerator } from "../engine/actor";
 import { BoxCollider2d } from "../engine/collision/box-collider2d";
 import { Engine } from "../engine/engine";
-import { Event, EventEmitter, SimpleEventEmitter } from "../engine/event";
+import {
+  Event,
+  EventEmitter,
+  SimpleEvent,
+  SimpleEventEmitter,
+} from "../engine/event";
 import { SpriteEngine } from "../engine/sprite-engine";
 import { AnimatedSprite } from "../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../engine/tools";
@@ -25,17 +30,35 @@ export type DeserializedShip = {
   playerId: number;
   color: [number, number, number];
   currentWeapon: number;
+  invincibleUntil: number;
 };
 
 export class Ship
   extends Actor
   implements Damageable, EventEmitter<"killed", Ship>
 {
+  /**
+   * Set the ship to be invincible for a certain amount of time
+   * @param time The time in seconds the ship will be invincible
+   */
+  setInvincible(time: number) {
+    this.invincibleUntil = love.timer.getTime() + time;
+  }
+
+  /**
+   * Check if the ship is invincible
+   * @returns True if the ship is invincible
+   */
+  isInvincible(): boolean {
+    return this.invincibleUntil > love.timer.getTime();
+  }
+
   weapons: Weapon[];
   currentWeapon = 0;
   private simpleEventEmitter = new SimpleEventEmitter<"killed", Ship>();
   public score = 0;
   public color: [number, number, number] = [1, 1, 1];
+  public invincibleUntil = 0;
 
   constructor(
     id: number,
@@ -76,7 +99,7 @@ export class Ship
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   damage(_src: Actor | undefined, _amount: number): void {
-    //this.simpleEventEmitter.pushEvent(new SimpleEvent("killed", this));
+    this.simpleEventEmitter.pushEvent(new SimpleEvent("killed", this));
   }
 
   getScore(): number {
@@ -171,12 +194,17 @@ export class Ship
   }
 
   draw() {
-    love.graphics.setColor(...this.color);
+    let alpha = 1;
+    if (this.isInvincible()) {
+      alpha = 0.5 + 0.5 * Math.sin(love.timer.getTime() * 20);
+    }
+    love.graphics.setColor(...this.color, alpha < 1 ? alpha * 0.5 : alpha);
     love.graphics.rectangle("fill", this.pos.x + 21, this.pos.y + 11, 15, 6);
     love.graphics.setBlendMode("alpha");
-    love.graphics.setColor(1, 1, 1);
+    love.graphics.setColor(1, 1, 1, alpha);
     super.draw();
     this.weapons[this.currentWeapon].draw();
+    love.graphics.setColor(1, 1, 1);
   }
 
   serialize(): string {
@@ -188,6 +216,7 @@ export class Ship
       this.player.id,
       ...this.color.map((c) => Math.round(c * 255)),
       this.currentWeapon,
+      this.invincibleUntil,
     ].join("|");
   }
   deserialize(data: string | DeserializedShip): void {
@@ -197,6 +226,7 @@ export class Ship
     this.pos = props.pos;
     this.color = props.color;
     this.currentWeapon = props.currentWeapon;
+    this.invincibleUntil = props.invincibleUntil;
   }
   static deserialize(data: string | string[]): DeserializedShip {
     const arr = typeof data === "string" ? data.split("|") : data;
@@ -211,6 +241,7 @@ export class Ship
         parseInt(arr[idx++]) / 255,
       ],
       currentWeapon: parseInt(arr[idx++]),
+      invincibleUntil: parseInt(arr[idx++]),
     };
   }
 }

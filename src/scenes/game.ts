@@ -39,7 +39,7 @@ export class GameScene implements Scene {
   }
 
   constructor(private players: Player[]) {
-    const enemyCount = 3;
+    const enemyCount = 6;
 
     this.camera = new Camera();
     this.starField = new StarField(this.camera, 200);
@@ -65,14 +65,17 @@ export class GameScene implements Scene {
         ship.color = GameScene.getShipColor(idx++);
         this.spriteEngine.addActor(ship);
         this.ships.set(p, ship);
-        ship.listen("killed", () => {
-          const ship = this.ships.get(p);
-          if (ship) {
-            this.spriteEngine.removeActor(ship);
-            this.ships.delete(p);
+        ship.listen("killed", (e) => {
+          const ship = e.getSource();
+          ship.pos = new Vector2(100, 100);
+          ship.setInvincible(3);
+          if (network.isServer()) {
+            network.sendData(GameNetEventTypes.SyncActor, ship.serialize());
           }
         });
-        network.sendData(GameNetEventTypes.SyncActor, ship.serialize());
+        if (network.isServer()) {
+          network.sendData(GameNetEventTypes.SyncActor, ship.serialize());
+        }
       }
     }
   }

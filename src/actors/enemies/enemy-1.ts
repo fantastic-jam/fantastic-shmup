@@ -39,6 +39,9 @@ export class Enemy1 extends Actor implements Damageable {
     this.y = pos.y;
     this.randCos = love.math.random(0, 500);
   }
+  isInvincible(): boolean {
+    return false;
+  }
 
   private getDir(): Vector2 {
     return new Vector2(-1, 0);
@@ -56,17 +59,21 @@ export class Enemy1 extends Actor implements Damageable {
     }
 
     // check collisions
-    for (const actor of this.spriteEngine.getActors()) {
-      if (
-        actor.collider &&
-        (actor as unknown as Damageable).damage &&
-        this.collider?.collides(actor.collider)
-      ) {
-        if ((actor as unknown as Ship).score) {
-          (actor as unknown as Ship).score -= 1000;
+    if (!network.isClient()) {
+      for (const actor of this.spriteEngine.getActors()) {
+        if (
+          actor.collider &&
+          (actor as unknown as Damageable).isInvincible &&
+          !(actor as unknown as Damageable).isInvincible() &&
+          (actor as unknown as Damageable).damage &&
+          this.collider?.collides(actor.collider)
+        ) {
+          (actor as unknown as Damageable).damage(this.parent, 100);
+          this.respawn();
+          if (network.isServer()) {
+            network.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          }
         }
-        (actor as unknown as Damageable).damage(this, 20);
-        this.respawn();
       }
     }
   }
@@ -110,7 +117,7 @@ export class Enemy1 extends Actor implements Damageable {
       this.randCos,
     ].join("|");
   }
-  
+
   deserialize(data: string | string[] | DeserializedEnemy1): void {
     const parts =
       typeof data === "string" || Array.isArray(data)
