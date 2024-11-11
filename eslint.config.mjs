@@ -11,7 +11,20 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylisticTypeChecked,
-  { rules: { "no-continue": "error" } },
+  {
+    rules: {
+      "no-continue": "error",
+      "@typescript-eslist/no-unused-vars": [
+        "error",
+        {
+          caughtErrors: "all",
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
   {
     languageOptions: {
       parserOptions: {
