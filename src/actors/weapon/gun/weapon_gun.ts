@@ -1,4 +1,4 @@
-import { Actor } from "../../../engine/actor";
+import { Actor, idGenerator } from "../../../engine/actor";
 import { SpriteEngine } from "../../../engine/sprite-engine";
 import { Vector2 } from "../../../engine/tools";
 import { Weapon } from "../weapon";
@@ -8,12 +8,22 @@ export class WeaponGun extends Actor implements Weapon {
   lastFired?: number = undefined;
 
   constructor(
+    id: number,
     spriteEngine: SpriteEngine,
     pos: Vector2,
     public cooldown = 0.5,
     parent: Actor
   ) {
-    super("WeaponGun", spriteEngine, pos, 0, undefined, undefined, parent);
+    super(
+      id,
+      "WeaponGun",
+      spriteEngine,
+      pos,
+      0,
+      undefined,
+      undefined,
+      parent
+    );
   }
 
   fire(): void {
@@ -23,7 +33,12 @@ export class WeaponGun extends Actor implements Weapon {
     ) {
       this.lastFired = love.timer.getTime();
       this.spriteEngine.addActor(
-        new Bullet(this.spriteEngine, Vector2.of(this.globalPos()), this.parent ?? this)
+        new Bullet(
+          idGenerator.next(),
+          this.spriteEngine,
+          Vector2.of(this.globalPos()),
+          this.parent ?? this
+        )
       );
     }
   }

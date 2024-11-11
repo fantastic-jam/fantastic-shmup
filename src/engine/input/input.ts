@@ -2,6 +2,7 @@ import { GamepadButton, Joystick } from "love.joystick";
 import { customInputMappings } from "../../conf";
 import { ExtendedJoystick } from "./extended-joystick";
 import { KeyboardJoystick } from "./keyboard-joystick";
+import { NullJoystick } from "./null-joystick";
 import { RemappedJoystick } from "./remapped-joystick";
 
 function isNintendoOs(): boolean {
@@ -25,8 +26,10 @@ export type GamepadActionMappings = Record<InputActions, GamepadButton>;
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Input {
-  private static keyboard = new KeyboardJoystick();
+  private static keyboard: ExtendedJoystick<string>;
+
   private static joysticks: ExtendedJoystick<string>[] = [];
+  private static gamepadActionMappings: GamepadActionMappings;
   private static nintendoGamepads: Record<string, string> = {
     "{B58A259A-13AA-46E0-BDCB-31898EDAB24E}": "NINTENDO_3DS",
     "{7BC9702D-7D81-4EBB-AD4F-8C94076588D5}": "NEW_NINTENDO_3DS",
@@ -97,20 +100,33 @@ export class Input {
   }
 
   static init(): void {
-    const gamepadActionMappings = {
+    Input.gamepadActionMappings = {
       ...(isNintendoOs() ? nintendoMappings : standardMappings),
       ...customInputMappings,
-    };
+    } as GamepadActionMappings;
 
     const joysticks = love.joystick
       .getJoysticks()
       .map((j) => this.remapJoystick(j));
 
-    if (Input.hasKeyboard()) {
-      joysticks.push(Input.keyboard);
-    }
     this.joysticks = joysticks.map((j) =>
-      this.extendJoystick(j, gamepadActionMappings as GamepadActionMappings)
+      this.extendJoystick(j, Input.gamepadActionMappings)
     );
+    if (Input.hasKeyboard()) {
+      Input.keyboard = this.extendJoystick(
+        new KeyboardJoystick(),
+        Input.gamepadActionMappings
+      );
+      this.joysticks.push(Input.keyboard);
+    }
+  }
+
+  static registerNullJoystick(): ExtendedJoystick<InputActions> {
+    const j = Input.extendJoystick(
+      new NullJoystick(),
+      Input.gamepadActionMappings
+    );
+    Input.joysticks.push(j);
+    return j;
   }
 }

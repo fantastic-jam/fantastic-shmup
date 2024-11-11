@@ -1,4 +1,5 @@
 import { Image } from "love.graphics";
+import { CollisionLayer } from "../../../collisions";
 import { config } from "../../../conf";
 import { Actor, Damageable } from "../../../engine/actor";
 import { BoxCollider2d } from "../../../engine/collision/box-collider2d";
@@ -6,7 +7,7 @@ import { Engine } from "../../../engine/engine";
 import { SpriteEngine } from "../../../engine/sprite-engine";
 import { AnimatedSprite } from "../../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../../engine/tools";
-import { CollisionLayer } from "../../../collisions";
+import { network } from "../../../scenes/network";
 
 let image: Image;
 Engine.preload(() => {
@@ -14,14 +15,28 @@ Engine.preload(() => {
 });
 
 export class Missile extends Actor {
-  constructor(spriteEngine: SpriteEngine, pos: Vector2, parent: Actor) {
+  constructor(
+    id: number,
+    spriteEngine: SpriteEngine,
+    pos: Vector2,
+    parent: Actor
+  ) {
     const animatedSprite = new AnimatedSprite(image, 16, 16, 0.05);
     const collider = new BoxCollider2d(
       new Rectangle(5, 5, 10, 6),
       [CollisionLayer.PLAYERS],
       [CollisionLayer.ENEMIES]
     );
-    super("Missile", spriteEngine, pos, 200, animatedSprite, collider, parent);
+    super(
+      id,
+      "Missile",
+      spriteEngine,
+      pos,
+      200,
+      animatedSprite,
+      collider,
+      parent
+    );
   }
 
   update(dt: number) {
@@ -38,7 +53,9 @@ export class Missile extends Actor {
         (actor as unknown as Damageable).damage &&
         this.collider?.collides(actor.collider)
       ) {
-        (actor as unknown as Damageable).damage(this.parent, 100,);
+        if (!network.isClient()) {
+          (actor as unknown as Damageable).damage(this.parent, 100);
+        }
         this.spriteEngine.removeActor(this);
       }
     }

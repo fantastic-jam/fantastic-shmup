@@ -8,8 +8,16 @@ export interface Damageable {
   damage(src: Actor | undefined, amount: number): void;
 }
 
+export const idGenerator = {
+  currentValue: 0,
+  next() {
+    return this.currentValue++;
+  },
+};
+
 export class Actor {
   constructor(
+    public id: number,
     private type: string,
     public spriteEngine: SpriteEngine,
     public pos: Vector2 = new Vector2(0, 0),
@@ -38,4 +46,7 @@ export class Actor {
   draw(screen?: Screen) {
     this.sprite?.draw(this.pos, screen);
   }
+
+  serialize?(): string;
+  deserialize?(data: string): void;
 }

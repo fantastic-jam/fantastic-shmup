@@ -1,6 +1,6 @@
 import { Image } from "love.graphics";
 import { config } from "../../conf";
-import { Actor, Damageable } from "../../engine/actor";
+import { Actor, Damageable, idGenerator } from "../../engine/actor";
 import { BoxCollider2d } from "../../engine/collision/box-collider2d";
 import { Engine } from "../../engine/engine";
 import { SpriteEngine } from "../../engine/sprite-engine";
@@ -8,6 +8,8 @@ import { AnimatedSprite } from "../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../engine/tools";
 import { CollisionLayer } from "../../collisions";
 import { Ship } from "../ship";
+import { GameNetEventTypes, network } from "../../scenes/network";
+import { formatData } from "../../engine/network/utils";
 
 let image: Image;
 Engine.preload(() => {
@@ -19,7 +21,7 @@ export class Enemy1 extends Actor implements Damageable {
   private health = this.maxHealth;
   private y = 0;
   private randCos = 0;
-  constructor(spriteEngine: SpriteEngine, pos: Vector2) {
+  constructor(id: number, spriteEngine: SpriteEngine, pos: Vector2) {
     const animatedSprite = new AnimatedSprite(image, 40, 32, 0.1);
     const collider = new BoxCollider2d(
       new Rectangle(0, 8, 20, 17),
@@ -27,7 +29,7 @@ export class Enemy1 extends Actor implements Damageable {
       [CollisionLayer.PLAYERS]
     );
 
-    super("Enemy", spriteEngine, pos, 200, animatedSprite, collider);
+    super(id, "Enemy", spriteEngine, pos, 200, animatedSprite, collider);
     this.y = pos.y;
     this.randCos = love.math.random(0, 500);
   }
@@ -69,6 +71,9 @@ export class Enemy1 extends Actor implements Damageable {
     this.pos.y = love.math.random(config.screenHeight);
     this.y = this.pos.y;
     this.randCos = love.math.random(0, 500);
+    if (network.isServer()) {
+      network.sendData(GameNetEventTypes.EnemySpawn, this.serialize());
+    }
   }
 
   kill() {
@@ -87,5 +92,23 @@ export class Enemy1 extends Actor implements Damageable {
 
   draw() {
     super.draw();
+  }
+
+  serialize(): string {
+    return [
+      this.id,
+      this.pos.x,
+      this.pos.y,
+      this.y,
+      this.randCos,
+    ].join("|");
+  }
+  deserialize(data: string): void {
+    const parts = data.split("|");
+    this.id = parseInt(parts[0]);
+    this.pos.x = parseInt(parts[1]);
+    this.pos.y = parseInt(parts[2]);
+    this.y = parseInt(parts[3]);
+    this.randCos = parseInt(parts[4]);
   }
 }

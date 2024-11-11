@@ -22,8 +22,8 @@ love.load = () => {
   const menuScene = new MenuScene();
   menuScene.listen("start", (event) => {
     event.getSource().unload();
-    const joysticks = event.getSource().getPlayers();
-    scene = new GameScene(joysticks);
+    const players = event.getSource().getPlayers();
+    scene = new GameScene(players);
   });
   scene = menuScene;
 };

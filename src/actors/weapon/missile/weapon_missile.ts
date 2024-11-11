@@ -1,6 +1,7 @@
-import { Actor } from "../../../engine/actor";
+import { Actor, idGenerator } from "../../../engine/actor";
 import { SpriteEngine } from "../../../engine/sprite-engine";
 import { Vector2 } from "../../../engine/tools";
+import { network } from "../../../scenes/network";
 import { Weapon } from "../weapon";
 import { Missile } from "./missile";
 
@@ -8,12 +9,22 @@ export class WeaponMissile extends Actor implements Weapon {
   lastFired?: number = undefined;
 
   constructor(
+    id: number,
     spriteEngine: SpriteEngine,
     pos: Vector2,
     public cooldown = 3,
     parent: Actor
   ) {
-    super("WeaponMissile", spriteEngine, pos, 0, undefined, undefined, parent);
+    super(
+      id,
+      "WeaponMissile",
+      spriteEngine,
+      pos,
+      0,
+      undefined,
+      undefined,
+      parent
+    );
   }
 
   fire(): void {
@@ -23,7 +34,12 @@ export class WeaponMissile extends Actor implements Weapon {
     ) {
       this.lastFired = love.timer.getTime();
       this.spriteEngine.addActor(
-        new Missile(this.spriteEngine, Vector2.of(this.globalPos()), this.parent ?? this)
+        new Missile(
+          idGenerator.next(),
+          this.spriteEngine,
+          Vector2.of(this.globalPos()),
+          this.parent ?? this
+        )
       );
     }
   }
