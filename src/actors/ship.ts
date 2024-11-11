@@ -5,21 +5,27 @@ import { Actor, Damageable, idGenerator } from "../engine/actor";
 import { BoxCollider2d } from "../engine/collision/box-collider2d";
 import { Engine } from "../engine/engine";
 import { Event, EventEmitter, SimpleEventEmitter } from "../engine/event";
-import { ExtendedJoystick } from "../engine/input/extended-joystick";
-import { InputActions } from "../engine/input/input";
 import { SpriteEngine } from "../engine/sprite-engine";
 import { AnimatedSprite } from "../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../engine/tools";
+import { Player } from "../player";
+import { GameNetEventTypes, network } from "../scenes/network";
 import { WeaponGun } from "./weapon/gun/weapon_gun";
 import { WeaponMissile } from "./weapon/missile/weapon_missile";
 import { Weapon } from "./weapon/weapon";
-import { Player } from "../player";
-import { GameNetEventTypes, network } from "../scenes/network";
 
 let image: Image;
 Engine.preload(() => {
   image = love.graphics.newImage("/assets/ship.png");
 });
+
+export type DeserializedShip = {
+  id: number;
+  pos: Vector2;
+  playerId: number;
+  color: [number, number, number];
+  currentWeapon: number;
+};
 
 export class Ship
   extends Actor
@@ -138,21 +144,29 @@ export class Ship
     }
 
     if (this.isMainWeaponFiring()) {
-      this.weapons[this.currentWeapon].fire();
-      if (this.player.isLocal()) {
+      const fired = this.weapons[this.currentWeapon].fire();
+      if (fired && this.player.isLocal() && network.isClient()) {
         network.sendData(GameNetEventTypes.Fire, `${this.id}|fire`);
       }
     }
 
+    let weaponIdx = this.currentWeapon;
     if (this.player.joystick.isActionDown("weapon_up")) {
-      this.currentWeapon = Math.abs(
-        (this.currentWeapon + 1) % this.weapons.length
-      );
+      weaponIdx = Math.abs((this.currentWeapon + 1) % this.weapons.length);
     }
     if (this.player.joystick.isActionDown("weapon_down")) {
-      this.currentWeapon = Math.abs(
-        (this.currentWeapon - 1) % this.weapons.length
-      );
+      weaponIdx = Math.abs((this.currentWeapon - 1) % this.weapons.length);
+    }
+    if (weaponIdx !== this.currentWeapon) {
+      if (!network.isClient()) {
+        this.currentWeapon = weaponIdx;
+      }
+      if (network.isClient() || network.isServer()) {
+        network.sendData(
+          GameNetEventTypes.ChangeWeapon,
+          `${this.id}|${weaponIdx}`
+        );
+      }
     }
   }
 
@@ -167,32 +181,36 @@ export class Ship
 
   serialize(): string {
     return [
+      "Ship",
       this.id,
       this.pos.x,
       this.pos.y,
       this.player.id,
-      ...this.color.map((c) => Math.round(c * 255))
+      ...this.color.map((c) => Math.round(c * 255)),
+      this.currentWeapon,
     ].join("|");
   }
-  deserialize(data: string): void {
-    const props = Ship.deserialize(data);
+  deserialize(data: string | DeserializedShip): void {
+    const props = typeof data === "string" ? Ship.deserialize(data) : data;
     this.id = props.id;
     this.player.id = props.playerId;
     this.pos = props.pos;
     this.color = props.color;
+    this.currentWeapon = props.currentWeapon;
   }
-  static deserialize(data: string): {
-    id: number;
-    pos: Vector2;
-    playerId: number;
-    color: [number, number, number];
-  } {
-    const [id, x, y, playerId, r, g, b] = data.split("|");
+  static deserialize(data: string | string[]): DeserializedShip {
+    const arr = typeof data === "string" ? data.split("|") : data;
+    let idx = 1;
     return {
-      id: parseInt(id),
-      pos: new Vector2(parseFloat(x), parseFloat(y)),
-      playerId: parseInt(playerId),
-      color: [parseInt(r) / 255, parseInt(g) / 255, parseInt(b) / 255],
+      id: parseInt(arr[idx++]),
+      pos: new Vector2(parseFloat(arr[idx++]), parseFloat(arr[idx++])),
+      playerId: parseInt(arr[idx++]),
+      color: [
+        parseInt(arr[idx++]) / 255,
+        parseInt(arr[idx++]) / 255,
+        parseInt(arr[idx++]) / 255,
+      ],
+      currentWeapon: parseInt(arr[idx++]),
     };
   }
 }

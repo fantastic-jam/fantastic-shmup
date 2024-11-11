@@ -16,10 +16,11 @@ export enum GameNetEventTypes {
   Button = NetEventTypes.Last + 1,
   Position,
   Fire,
+  ChangeWeapon,
   Hit,
-  Respawn,
+  SyncActor,
+  RemoveActor,
   // enemy events
-  EnemySpawn,
   // game events
   Ready,
   Start,

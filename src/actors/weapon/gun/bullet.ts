@@ -7,12 +7,18 @@ import { SpriteEngine } from "../../../engine/sprite-engine";
 import { AnimatedSprite } from "../../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../../engine/tools";
 import { CollisionLayer } from "../../../collisions";
-import { network } from "../../../scenes/network";
+import { GameNetEventTypes, network } from "../../../scenes/network";
 
 let image: Image;
 Engine.preload(() => {
   image = love.graphics.newImage("assets/ship-bullet.png");
 });
+
+export type DeserializedBullet = {
+  id: number;
+  pos: Vector2;
+  parentId: number | undefined;
+};
 
 export class Bullet extends Actor {
   constructor(
@@ -37,6 +43,9 @@ export class Bullet extends Actor {
       collider,
       parent
     );
+    if (network.isServer()) {
+      network.sendData(GameNetEventTypes.SyncActor, this.serialize());
+    }
   }
 
   update(dt: number) {
@@ -59,5 +68,34 @@ export class Bullet extends Actor {
         this.spriteEngine.removeActor(this);
       }
     }
+  }
+
+  serialize(): string {
+    return [
+      "Bullet",
+      this.id,
+      this.pos.x,
+      this.pos.y,
+      this.parent?.id ?? "",
+    ].join("|");
+  }
+  deserialize(data: string | DeserializedBullet): void {
+    const props = typeof data === "string" ? Bullet.deserialize(data) : data;
+    this.id = props.id;
+    this.pos = props.pos;
+    if (this.parent?.id !== props.parentId) {
+      this.parent = this.spriteEngine
+        .getActors()
+        .find((a) => a.id === props.parentId);
+    }
+  }
+  static deserialize(data: string | string[]): DeserializedBullet {
+    const arr = typeof data === "string" ? data.split("|") : data;
+    let idx = 1;
+    return {
+      id: parseInt(arr[idx++]),
+      pos: new Vector2(parseFloat(arr[idx++]), parseFloat(arr[idx++])),
+      parentId: arr[idx] == null ? undefined : parseInt(arr[idx++]),
+    };
   }
 }

@@ -7,12 +7,18 @@ import { Engine } from "../../../engine/engine";
 import { SpriteEngine } from "../../../engine/sprite-engine";
 import { AnimatedSprite } from "../../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../../engine/tools";
-import { network } from "../../../scenes/network";
+import { GameNetEventTypes, network } from "../../../scenes/network";
 
 let image: Image;
 Engine.preload(() => {
   image = love.graphics.newImage("assets/ship-missile.png");
 });
+
+export type DeserializedMissile = {
+  id: number;
+  pos: Vector2;
+  parentId: number | undefined;
+};
 
 export class Missile extends Actor {
   constructor(
@@ -37,6 +43,9 @@ export class Missile extends Actor {
       collider,
       parent
     );
+    if (network.isServer()) {
+      network.sendData(GameNetEventTypes.SyncActor, this.serialize());
+    }
   }
 
   update(dt: number) {
@@ -55,9 +64,39 @@ export class Missile extends Actor {
       ) {
         if (!network.isClient()) {
           (actor as unknown as Damageable).damage(this.parent, 100);
+          this.spriteEngine.removeActor(this);
+          network.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
         }
-        this.spriteEngine.removeActor(this);
       }
     }
+  }
+
+  serialize(): string {
+    return [
+      "Missile",
+      this.id,
+      this.pos.x,
+      this.pos.y,
+      this.parent?.id ?? "",
+    ].join("|");
+  }
+  deserialize(data: string | DeserializedMissile): void {
+    const props = typeof data === "string" ? Missile.deserialize(data) : data;
+    this.id = props.id;
+    this.pos = props.pos;
+    if (this.parent?.id !== props.parentId) {
+      this.parent = this.spriteEngine
+        .getActors()
+        .find((a) => a.id === props.parentId);
+    }
+  }
+  static deserialize(data: string | string[]): DeserializedMissile {
+    const arr = typeof data === "string" ? data.split("|") : data;
+    let idx = 1;
+    return {
+      id: parseInt(arr[idx++]),
+      pos: new Vector2(parseFloat(arr[idx++]), parseFloat(arr[idx++])),
+      parentId: arr[idx] == null ? undefined : parseInt(arr[idx++]),
+    };
   }
 }

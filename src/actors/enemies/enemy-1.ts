@@ -1,20 +1,26 @@
 import { Image } from "love.graphics";
+import { CollisionLayer } from "../../collisions";
 import { config } from "../../conf";
-import { Actor, Damageable, idGenerator } from "../../engine/actor";
+import { Actor, Damageable } from "../../engine/actor";
 import { BoxCollider2d } from "../../engine/collision/box-collider2d";
 import { Engine } from "../../engine/engine";
 import { SpriteEngine } from "../../engine/sprite-engine";
 import { AnimatedSprite } from "../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../engine/tools";
-import { CollisionLayer } from "../../collisions";
-import { Ship } from "../ship";
 import { GameNetEventTypes, network } from "../../scenes/network";
-import { formatData } from "../../engine/network/utils";
+import { Ship } from "../ship";
 
 let image: Image;
 Engine.preload(() => {
   image = love.graphics.newImage("assets/enemy-1.png");
 });
+
+export type DeserializedEnemy1 = {
+  id: number;
+  pos: Vector2;
+  y: number;
+  randCos: number;
+};
 
 export class Enemy1 extends Actor implements Damageable {
   private maxHealth = 100;
@@ -72,7 +78,7 @@ export class Enemy1 extends Actor implements Damageable {
     this.y = this.pos.y;
     this.randCos = love.math.random(0, 500);
     if (network.isServer()) {
-      network.sendData(GameNetEventTypes.EnemySpawn, this.serialize());
+      network.sendData(GameNetEventTypes.SyncActor, this.serialize());
     }
   }
 
@@ -96,6 +102,7 @@ export class Enemy1 extends Actor implements Damageable {
 
   serialize(): string {
     return [
+      "Enemy1",
       this.id,
       this.pos.x,
       this.pos.y,
@@ -103,12 +110,26 @@ export class Enemy1 extends Actor implements Damageable {
       this.randCos,
     ].join("|");
   }
-  deserialize(data: string): void {
-    const parts = data.split("|");
-    this.id = parseInt(parts[0]);
-    this.pos.x = parseInt(parts[1]);
-    this.pos.y = parseInt(parts[2]);
-    this.y = parseInt(parts[3]);
-    this.randCos = parseInt(parts[4]);
+  
+  deserialize(data: string | string[] | DeserializedEnemy1): void {
+    const parts =
+      typeof data === "string" || Array.isArray(data)
+        ? Enemy1.deserialize(data)
+        : data;
+    this.id = parts.id;
+    this.pos = parts.pos;
+    this.y = parts.y;
+    this.randCos = parts.randCos;
+  }
+
+  static deserialize(data: string | string[]): DeserializedEnemy1 {
+    const parts = typeof data === "string" ? data.split("|") : data;
+    let idx = 1;
+    return {
+      id: parseInt(parts[idx++]),
+      pos: new Vector2(parseFloat(parts[idx++]), parseFloat(parts[idx++])),
+      y: parseInt(parts[idx++]),
+      randCos: parseInt(parts[idx++]),
+    };
   }
 }

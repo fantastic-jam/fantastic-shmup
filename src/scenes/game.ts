@@ -2,10 +2,11 @@ import { Source } from "love.audio";
 import { Screen } from "love.graphics";
 import { Enemy1 } from "../actors/enemies/enemy-1";
 import { Ship } from "../actors/ship";
+import { Bullet } from "../actors/weapon/gun/bullet";
+import { Missile } from "../actors/weapon/missile/missile";
 import { config } from "../conf";
 import { idGenerator } from "../engine/actor";
 import { Camera } from "../engine/camera";
-import { Input } from "../engine/input/input";
 import { LiaisonStatus } from "../engine/network";
 import { Scene } from "../engine/scene";
 import { SpriteEngine } from "../engine/sprite-engine";
@@ -33,7 +34,7 @@ export class GameScene implements Scene {
     );
     this.spriteEngine.addActor(enemy);
     if (network.isServer()) {
-      network.sendData(GameNetEventTypes.EnemySpawn, enemy.serialize());
+      network.sendData(GameNetEventTypes.SyncActor, enemy.serialize());
     }
   }
 
@@ -71,7 +72,7 @@ export class GameScene implements Scene {
             this.ships.delete(p);
           }
         });
-        network.sendData(GameNetEventTypes.Respawn, ship.serialize());
+        network.sendData(GameNetEventTypes.SyncActor, ship.serialize());
       }
     }
   }
@@ -117,42 +118,73 @@ export class GameScene implements Scene {
           ship.weapons[ship.currentWeapon].fire();
         }
       } else if (type === GameNetEventTypes.Position) {
-        const [id, x, y] = content.split("|").map((v) => parseFloat(v));
+        const [id, x, y] = content.split("|");
+        const a = this.spriteEngine
+          .getActors()
+          .find((a) => a.id === parseInt(id));
+        if (a) {
+          a.pos = new Vector2(parseFloat(x), parseFloat(y));
+        }
+      } else if (type === GameNetEventTypes.ChangeWeapon) {
+        const [id, weapon] = content.split("|");
+        const a = this.spriteEngine
+          .getActors()
+          .find((a) => a.id === parseInt(id)) as Ship;
+        if (a) {
+          a.currentWeapon = parseInt(weapon);
+        }
+      } else if (type === GameNetEventTypes.RemoveActor) {
+        const id = parseInt(content);
         const a = this.spriteEngine.getActors().find((a) => a.id === id);
         if (a) {
-          a.pos = new Vector2(x, y);
+          this.spriteEngine.removeActor(a);
         }
-      } else if (type === GameNetEventTypes.EnemySpawn) {
-        const strId = content.split("|").shift();
-        const id = strId ? parseInt(strId) : undefined;
-        if (id) {
-          const a = this.spriteEngine.getActors().find((a) => a.id === id);
-          if (!a) {
+      } else if (type === GameNetEventTypes.SyncActor) {
+        const arr = content.split("|");
+        const id = parseInt(arr[1]);
+        const a = this.spriteEngine.getActors().find((a) => a.id === id);
+        if (a) {
+          a.deserialize?.(content);
+        } else {
+          if (arr[0] === "Ship") {
+            const shipProps = Ship.deserialize(content);
+            const player = this.players.find(
+              (p) => p.id === shipProps.playerId
+            )!;
+            const newShip = new Ship(
+              shipProps.id,
+              this.spriteEngine,
+              shipProps.pos,
+              player
+            );
+            newShip.color = shipProps.color;
+            this.ships.set(player, newShip);
+            this.spriteEngine.addActor(newShip);
+          } else if (arr[0] === "Enemy1") {
             const enemy = new Enemy1(id, this.spriteEngine, new Vector2(0, 0));
             enemy.deserialize(content);
             this.spriteEngine.addActor(enemy);
-          } else {
-            a.deserialize?.(content);
+          } else if (arr[0] === "Bullet") {
+            const bulletProps = Bullet.deserialize(content);
+            const bullet = new Bullet(
+              id,
+              this.spriteEngine,
+              new Vector2(0, 0),
+              { id: bulletProps.parentId } as Ship
+            );
+            bullet.deserialize(bulletProps);
+            this.spriteEngine.addActor(bullet);
+          } else if (arr[0] === "Missile") {
+            const missileProps = Missile.deserialize(content);
+            const missile = new Missile(
+              id,
+              this.spriteEngine,
+              new Vector2(0, 0),
+              { id: missileProps.parentId } as Ship
+            );
+            missile.deserialize(missileProps);
+            this.spriteEngine.addActor(missile);
           }
-        }
-      } else if (type === GameNetEventTypes.Respawn) {
-        const shipProps = Ship.deserialize(content);
-        const ship = this.spriteEngine
-          .getActors()
-          .find((a) => a.id === shipProps.id) as Ship | undefined;
-        if (ship != null) {
-          ship.deserialize(content);
-        } else {
-          const player = this.players.find((p) => p.id === shipProps.playerId)!;
-          const newShip = new Ship(
-            shipProps.id,
-            this.spriteEngine,
-            shipProps.pos,
-            player
-          );
-          newShip.color = shipProps.color;
-          this.ships.set(player, newShip);
-          this.spriteEngine.addActor(newShip);
         }
       }
       receivedData = network.receiveData();
@@ -183,7 +215,7 @@ export class GameScene implements Scene {
         const ship = this.ships.get(localPlayer)!;
         this.spriteEngine.addActor(ship);
         if (network.isServer()) {
-          network.sendData(GameNetEventTypes.Respawn, "" + ship.id);
+          network.sendData(GameNetEventTypes.SyncActor, "" + ship.id);
         }
       }
       if (localPlayer.joystick.isGamepadDown("back")) {

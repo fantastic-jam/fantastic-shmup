@@ -27,12 +27,15 @@ export class WeaponMissile extends Actor implements Weapon {
     );
   }
 
-  fire(): void {
+  fire(): boolean {
     if (
-      !this.lastFired ||
-      love.timer.getTime() > this.lastFired + this.cooldown
+      this.lastFired &&
+      love.timer.getTime() <= this.lastFired + this.cooldown
     ) {
-      this.lastFired = love.timer.getTime();
+      return false;
+    }
+    this.lastFired = love.timer.getTime();
+    if (!network.isClient()) {
       this.spriteEngine.addActor(
         new Missile(
           idGenerator.next(),
@@ -42,5 +45,6 @@ export class WeaponMissile extends Actor implements Weapon {
         )
       );
     }
+    return true;
   }
 }
