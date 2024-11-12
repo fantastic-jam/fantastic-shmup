@@ -35,7 +35,7 @@ export class Enemy1 extends Actor implements Damageable {
       [CollisionLayer.PLAYERS]
     );
 
-    super(id, "Enemy", spriteEngine, pos, 200, animatedSprite, collider);
+    super(id, "Enemy", spriteEngine, pos, 130, animatedSprite, collider);
     this.y = pos.y;
     this.randCos = love.math.random(0, 500);
   }
@@ -96,7 +96,7 @@ export class Enemy1 extends Actor implements Damageable {
   damage(src: Actor | undefined, amount: number) {
     this.health = Math.max(this.health - amount, 0);
     if (this.health === 0) {
-      if ((src as unknown as Ship).score) {
+      if ((src as unknown as Ship).score != null) {
         (src as unknown as Ship).score += 100;
       }
       this.kill();
