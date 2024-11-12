@@ -14,6 +14,7 @@ declare module "love" {
    * @noSelf 
    */
   function draw(screen?: Screen): void;
+  const _console: "3DS" | "Switch" | "WiiU" | undefined;
 }
 
 declare module "love.graphics" {

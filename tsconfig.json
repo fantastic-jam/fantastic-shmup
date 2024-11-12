@@ -3,7 +3,8 @@
     "strict": true,
     "target": "ESNext",
     "lib": ["ESNext"],
-    "moduleResolution": "Node",
+    "moduleResolution": "Node10",
+    "module": "CommonJS",
     "types": [
       "love-typescript-definitions",
       "@typescript-to-lua/language-extensions",
@@ -13,6 +14,6 @@
     "outDir": "lua"
   },
 
-  "include": ["src/**/**.ts", "types/**/*.d.ts"],
+  "include": ["src/**/**.ts", "types/**/*.d.ts",],
   "tstl": { "luaTarget": "JIT" }
 }

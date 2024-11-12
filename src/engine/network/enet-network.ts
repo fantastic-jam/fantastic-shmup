@@ -1,7 +1,6 @@
 import { Host, host_create, Peer } from "enet";
 import { LiaisonMode, LiaisonStatus, Network } from "../network";
 import { formatData, NetEventTypes, parseData } from "./utils";
-import { remove } from "love.filesystem";
 
 const peerIdGenerator = {
   next: () => {
@@ -57,7 +56,7 @@ export class EnetNetwork implements Network {
   }
   host(): boolean {
     this.mode = LiaisonMode.LIAISON_MODE_SERVER;
-    this.enetHost = host_create("localhost:1234");
+    this.enetHost = host_create("0.0.0.0:1234");
     return true;
   }
   waitConnectionStatusEvent(nextEvent: boolean, wait: boolean): boolean {

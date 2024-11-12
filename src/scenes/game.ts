@@ -133,7 +133,7 @@ export class GameScene implements Scene {
         const a = this.spriteEngine
           .getActors()
           .find((a) => a.id === parseInt(id)) as Ship;
-        if (a) {
+        if (a != null) {
           a.currentWeapon = parseInt(weapon);
         }
       } else if (type === GameNetEventTypes.RemoveActor) {

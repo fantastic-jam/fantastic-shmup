@@ -1,4 +1,11 @@
 declare global {
-  export function print(...args: string[]): void;
+  /**
+   * @noSelf
+   */
+  export function print(...args: any[]): void;
+  /**
+   * @noSelf
+   */
+  export function require(name: string): any;
 }
 export {};
