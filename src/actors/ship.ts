@@ -174,10 +174,10 @@ export class Ship
     }
 
     let weaponIdx = this.currentWeapon;
-    if (this.player.joystick.isActionDown("weapon_up")) {
+    if (this.player.joystick.isActionReleased("weapon_up")) {
       weaponIdx = Math.abs((this.currentWeapon + 1) % this.weapons.length);
     }
-    if (this.player.joystick.isActionDown("weapon_down")) {
+    if (this.player.joystick.isActionReleased("weapon_down")) {
       weaponIdx = Math.abs((this.currentWeapon - 1) % this.weapons.length);
     }
     if (weaponIdx !== this.currentWeapon) {

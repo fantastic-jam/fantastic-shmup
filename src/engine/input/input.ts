@@ -1,9 +1,13 @@
 import { GamepadButton, Joystick } from "love.joystick";
+import { KeyConstant, Scancode } from "love.keyboard";
 import { customInputMappings } from "../../conf";
+import { SimpleEvent, SimpleEventEmitter } from "../event";
+import { EventEmitterJoystick } from "./event-emitter-joystick";
 import { ExtendedJoystick } from "./extended-joystick";
 import { KeyboardJoystick } from "./keyboard-joystick";
 import { NullJoystick } from "./null-joystick";
 import { RemappedJoystick } from "./remapped-joystick";
+import { SimpleEventEmitterJoystick } from "./simple-event-emitter-joystick";
 
 function isNintendoOs(): boolean {
   return (love.system.getOS() as string) === "Horizon";
@@ -26,6 +30,14 @@ export type GamepadActionMappings = Record<InputActions, GamepadButton>;
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Input {
+  private static gamepadEmitter = new SimpleEventEmitter<
+    "gamepadpressed" | "gamepadreleased",
+    [Joystick, GamepadButton]
+  >();
+  private static keyboardEmitter = new SimpleEventEmitter<
+    "keypressed" | "keyreleased",
+    [KeyConstant, Scancode, boolean | undefined]
+  >();
   private static keyboard: ExtendedJoystick<string>;
 
   private static joysticks: ExtendedJoystick<string>[] = [];
@@ -56,7 +68,9 @@ export class Input {
     return !!love.keyboard.isScancodeDown;
   }
 
-  private static remapJoystick(joystick: Joystick): Joystick {
+  private static remapJoystick(
+    joystick: EventEmitterJoystick
+  ): EventEmitterJoystick {
     if (Input.isNintendoGamepad(joystick)) {
       return new RemappedJoystick(joystick, {
         axes: {
@@ -89,7 +103,7 @@ export class Input {
   }
 
   static extendJoystick(
-    joystick: Joystick,
+    joystick: EventEmitterJoystick,
     mappings: GamepadActionMappings
   ): ExtendedJoystick<InputActions> {
     return new ExtendedJoystick(joystick, mappings);
@@ -107,6 +121,7 @@ export class Input {
 
     const joysticks = love.joystick
       .getJoysticks()
+      .map((j) => this.makeEmitterJoystick(j, this.gamepadEmitter))
       .map((j) => this.remapJoystick(j));
 
     this.joysticks = joysticks.map((j) =>
@@ -114,11 +129,40 @@ export class Input {
     );
     if (Input.hasKeyboard()) {
       Input.keyboard = this.extendJoystick(
-        new KeyboardJoystick(),
+        new KeyboardJoystick(Input.keyboardEmitter),
         Input.gamepadActionMappings
       );
       this.joysticks.push(Input.keyboard);
     }
+
+    love.gamepadpressed = (j, b) => {
+      Input.gamepadEmitter.pushEvent(new SimpleEvent("gamepadpressed", [j, b]));
+    };
+    love.gamepadreleased = (j, b) => {
+      Input.gamepadEmitter.pushEvent(
+        new SimpleEvent("gamepadreleased", [j, b])
+      );
+    };
+    love.keypressed = (key, scancode, isrepeat) => {
+      Input.keyboardEmitter.pushEvent(
+        new SimpleEvent("keypressed", [key, scancode, isrepeat])
+      );
+    };
+    love.keyreleased = (key, scancode) => {
+      Input.keyboardEmitter.pushEvent(
+        new SimpleEvent("keyreleased", [key, scancode, undefined])
+      );
+    };
+  }
+
+  static makeEmitterJoystick(
+    j: Joystick,
+    emitter: SimpleEventEmitter<
+      "gamepadpressed" | "gamepadreleased",
+      [Joystick, GamepadButton]
+    >
+  ): EventEmitterJoystick {
+    return new SimpleEventEmitterJoystick(j, emitter);
   }
 
   static registerNullJoystick(): ExtendedJoystick<InputActions> {
@@ -128,5 +172,11 @@ export class Input {
     );
     Input.joysticks.push(j);
     return j;
+  }
+
+  static update(_dt: number): void {
+    for (const joystick of Input.joysticks) {
+      joystick.resetPressedStates();
+    }
   }
 }

@@ -6,9 +6,46 @@ import {
   JoystickHat,
   JoystickInputType,
 } from "love.joystick";
-import { Scancode } from "love.keyboard";
+import { KeyConstant, Scancode } from "love.keyboard";
+import { EventEmitterJoystick } from "./event-emitter-joystick";
+import { Event, EventEmitter, SimpleEvent, SimpleEventEmitter } from "../event";
 
-export class KeyboardJoystick implements Joystick {
+export class KeyboardJoystick implements EventEmitterJoystick {
+  private eventEmitter = new SimpleEventEmitter<
+    "pressed" | "released",
+    [Joystick, GamepadButton]
+  >();
+
+  constructor(
+    keyboardEmitter: EventEmitter<
+      "keypressed" | "keyreleased",
+      [KeyConstant, Scancode, boolean | undefined]
+    >
+  ) {
+    keyboardEmitter.listen("keypressed", (e) => {
+      const [_key, scancode] = e.getSource();
+      const btn = KeyboardJoystick.inverseMapping.get(scancode);
+      if (btn != null) {
+        this.eventEmitter.pushEvent(new SimpleEvent("pressed", [this, btn]));
+      }
+    });
+    keyboardEmitter.listen("keyreleased", (e) => {
+      const [_key, scancode] = e.getSource();
+      const btn = KeyboardJoystick.inverseMapping.get(scancode);
+      if (btn != null) {
+        this.eventEmitter.pushEvent(new SimpleEvent("released", [this, btn]));
+      }
+    });
+  }
+
+  listen(
+    eventType: "pressed" | "released",
+    callback: (
+      e: Event<"pressed" | "released", [Joystick, GamepadButton]>
+    ) => void
+  ): void {
+    return this.eventEmitter.listen(eventType, callback);
+  }
   private static axes: GamepadAxis[] = [
     "leftx",
     "lefty",
@@ -34,6 +71,15 @@ export class KeyboardJoystick implements Joystick {
     x: "t",
     y: "f",
   };
+  private static inverseMapping: Map<Scancode, GamepadButton> = (function () {
+    const result = new Map<Scancode, GamepadButton>();
+    for (const key of Object.keys(KeyboardJoystick.mapping)) {
+      const btn = key as GamepadButton;
+      result.set(KeyboardJoystick.mapping[btn], btn);
+    }
+    return result;
+  })();
+
   getAxes(): LuaMultiReturn<number[]> {
     return $multi(
       ...KeyboardJoystick.axes.map((axis) => this.getGamepadAxis(axis))

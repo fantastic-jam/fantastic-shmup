@@ -6,55 +6,42 @@ import {
   JoystickHat,
   JoystickInputType,
 } from "love.joystick";
-import { Event, SimpleEvent, SimpleEventEmitter } from "../event";
+import { Event, EventEmitter, SimpleEvent, SimpleEventEmitter } from "../event";
 import { EventEmitterJoystick } from "./event-emitter-joystick";
 
-export interface JoystickAxisRemap {
-  axis: GamepadAxis;
-  inverse: boolean;
-}
-
-export class RemappedJoystick implements EventEmitterJoystick {
+export class SimpleEventEmitterJoystick implements EventEmitterJoystick {
   private eventEmitter = new SimpleEventEmitter<
     "pressed" | "released",
     [Joystick, GamepadButton]
   >();
 
   public constructor(
-    private delegate: EventEmitterJoystick,
-    private remaps: {
-      axes?: Partial<Record<GamepadAxis, JoystickAxisRemap>>;
-      buttons?: Partial<Record<GamepadButton, GamepadButton>>;
-    }
+    private delegate: Joystick,
+    gamepadEventEmitter: EventEmitter<
+      "gamepadpressed" | "gamepadreleased",
+      [Joystick, GamepadButton]
+    >
   ) {
-    const inverseMapping: Partial<Record<GamepadButton, GamepadButton>> = {};
-    for (const key of Object.keys(this.remaps.buttons ?? {})) {
-      const btn = key as GamepadButton;
-      const value = this.remaps.buttons?.[btn];
-      if (value != null) {
-        inverseMapping[value] = btn;
-      }
-    }
-    delegate.listen("pressed", (e) => {
-      const [_j, b] = e.getSource();
-      const remap = inverseMapping[b];
-      if (remap) {
-        this.eventEmitter.pushEvent(new SimpleEvent("pressed", [this, remap]));
-      } else {
-        this.eventEmitter.pushEvent(new SimpleEvent("released", [this, b]));
+    gamepadEventEmitter.listen("gamepadpressed", (e) => {
+      const [j, b] = e.getSource();
+      if (j === this.delegate) {
+        this.eventEmitter.pushEvent(new SimpleEvent("pressed", [this, b]));
       }
     });
-    delegate.listen("released", (e) => {
-      const [_j, b] = e.getSource();
-      const remap = inverseMapping[b];
-      if (remap) {
-        this.eventEmitter.pushEvent(new SimpleEvent("released", [this, remap]));
-      } else {
+    gamepadEventEmitter.listen("gamepadreleased", (e) => {
+      const [j, b] = e.getSource();
+      if (j === this.delegate) {
         this.eventEmitter.pushEvent(new SimpleEvent("released", [this, b]));
       }
     });
   }
-  listen(eventType: "pressed" | "released", callback: (e: Event<"pressed" | "released", [Joystick, GamepadButton]>) => void): void {
+
+  listen(
+    eventType: "pressed" | "released",
+    callback: (
+      e: Event<"pressed" | "released", [Joystick, GamepadButton]>
+    ) => void
+  ): void {
     return this.eventEmitter.listen(eventType, callback);
   }
 
@@ -89,12 +76,6 @@ export class RemappedJoystick implements EventEmitterJoystick {
   }
 
   getGamepadAxis(axis: GamepadAxis): number {
-    const remap = this.remaps.axes?.[axis];
-    if (remap) {
-      return (
-        this.delegate.getGamepadAxis(remap.axis) * (remap.inverse ? -1 : 1)
-      );
-    }
     return this.delegate.getGamepadAxis(axis);
   }
 
@@ -143,18 +124,7 @@ export class RemappedJoystick implements EventEmitterJoystick {
   }
 
   isGamepadDown(...vararg: GamepadButton[]): boolean {
-    if (this.remaps.buttons == null) {
-      return this.delegate.isGamepadDown(...vararg);
-    }
-    return this.delegate.isGamepadDown(
-      ...vararg.map((button) => {
-        const remap = this.remaps.buttons?.[button];
-        if (remap) {
-          return remap;
-        }
-        return button;
-      })
-    );
+    return this.delegate.isGamepadDown(...vararg);
   }
 
   isVibrationSupported(): boolean {

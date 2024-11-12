@@ -88,10 +88,10 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       return;
     }
     for (const joystick of Input.getJoysticks()) {
-      if (joystick.isGamepadDown("start")) {
+      if (joystick.isGamepadReleased("start")) {
         this.ready(joystick);
       }
-      if (joystick.isGamepadDown("back")) {
+      if (joystick.isGamepadReleased("back")) {
         love.event.quit(0);
       }
     }

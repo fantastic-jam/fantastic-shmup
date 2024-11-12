@@ -6,8 +6,10 @@ import {
   JoystickHat,
   JoystickInputType,
 } from "love.joystick";
+import { EventEmitterJoystick } from "./event-emitter-joystick";
+import { Event } from "../event";
 
-export class NullJoystick implements Joystick {
+export class NullJoystick implements EventEmitterJoystick {
   private static axes: GamepadAxis[] = [
     "leftx",
     "lefty",
@@ -33,6 +35,9 @@ export class NullJoystick implements Joystick {
     "x",
     "y",
   ];
+  listen(_eventType: "pressed" | "released", _callback: (e: Event<"pressed" | "released", [Joystick, GamepadButton]>) => void): void {
+  }
+
   getAxes(): LuaMultiReturn<number[]> {
     return $multi(...NullJoystick.axes.map(() => 0));
   }

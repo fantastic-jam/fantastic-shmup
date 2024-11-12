@@ -2,7 +2,6 @@ import { Screen } from "love.graphics";
 
 import { config } from "./conf";
 import { Engine } from "./engine/engine";
-import { Input } from "./engine/input/input";
 import { Scene } from "./engine/scene";
 import { GameScene } from "./scenes/game";
 import { MenuScene } from "./scenes/menu";
@@ -16,7 +15,6 @@ love.load = () => {
     love.graphics.getWidth() / config.screenWidth,
     love.graphics.getHeight() / config.screenHeight
   );
-  Input.init();
   Engine.load();
 
   const menuScene = new MenuScene();
@@ -29,7 +27,9 @@ love.load = () => {
 };
 
 love.update = (dt) => {
-  scene?.update(dt);
+  Engine.update(dt, (dt: number) => {
+    scene?.update(dt);
+  });
 };
 
 love.draw = (screen?: Screen) => {

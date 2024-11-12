@@ -6,20 +6,83 @@ import {
   JoystickHat,
   JoystickInputType,
 } from "love.joystick";
+import { EventEmitter, SimpleEventEmitter } from "../event";
+import { EventEmitterJoystick } from "./event-emitter-joystick";
 
 export interface JoystickAxisRemap {
   axis: GamepadAxis;
   inverse: boolean;
 }
 
-export class ExtendedJoystick<T extends string> implements Joystick {
+export class ExtendedJoystick<T extends string>
+  implements
+    EventEmitterJoystick,
+    EventEmitter<"actionpressed" | "actionreleased", [Joystick, T]>
+{
+  private gamepadPressed: Partial<Record<GamepadButton, boolean>> = {};
+  private actionPressed: Partial<Record<T, boolean>> = {};
+  private gamepadReleased: Partial<Record<GamepadButton, boolean>> = {};
+  private actionReleased: Partial<Record<T, boolean>> = {};
+  private eventEmitter = new SimpleEventEmitter<
+    "pressed" | "released",
+    [Joystick, GamepadButton]
+  >();
+
   public constructor(
-    private delegate: Joystick,
+    private delegate: EventEmitterJoystick,
     private mapping: Record<T, GamepadButton>
-  ) {}
+  ) {
+    const inverseMapping: Partial<Record<GamepadButton, T>> = {};
+    for (const key of Object.keys(this.mapping ?? {})) {
+      const action = key as T;
+      const btn = this.mapping[action];
+      if (btn != null) {
+        inverseMapping[btn] = action;
+      }
+    }
+
+    delegate.listen("pressed", (e) => {
+      const [_j, b] = e.getSource();
+      this.gamepadPressed[b] = true;
+      if (inverseMapping[b]) {
+        this.actionPressed[inverseMapping[b]] = true;
+      }
+    });
+    delegate.listen("released", (e) => {
+      const [_j, b] = e.getSource();
+      this.gamepadReleased[b] = true;
+      if (inverseMapping[b]) {
+        this.actionReleased[inverseMapping[b]] = true;
+      }
+    });
+  }
+
+  // listen(eventType: "pressed" | "released", callback: any);
+  // listen(eventType: "actionPressed" | "actionReleased", callback: any);
+  listen(eventType: any, callback: any): void {
+    if (eventType === "actionPressed" || eventType === "actionReleased") {
+      return this.eventEmitter.listen(eventType, callback as any);
+    }
+    return this.eventEmitter.listen(eventType, callback);
+  }
+
+  resetPressedStates(): void {
+    this.gamepadPressed = {};
+    this.actionPressed = {};
+    this.gamepadReleased = {};
+    this.actionReleased = {};
+  }
 
   isActionDown(...actions: T[]): boolean {
     return this.isGamepadDown(...actions.map((action) => this.mapping[action]));
+  }
+
+  isActionReleased(...actions: T[]): boolean {
+    return actions.some((action) => this.actionReleased[action]);
+  }
+
+  isGamepadReleased(...buttons: GamepadButton[]): boolean {
+    return buttons.some((button) => this.gamepadReleased[button]);
   }
 
   getAxes(): LuaMultiReturn<number[]> {
