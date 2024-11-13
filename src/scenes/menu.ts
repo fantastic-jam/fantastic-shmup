@@ -177,6 +177,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       this.emitter.pushEvent(new SimpleEvent("start", this));
       return;
     }
+    const visibleNodes = u.nodes.filter((n) => n.visible);
     for (const joystick of Input.getJoysticks()) {
       if (joystick.isGamepadReleased("start")) {
         this.ready(joystick);
@@ -185,64 +186,65 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
         love.event.quit(0);
       }
       if (joystick.isGamepadReleased("dpup")) {
-        currentGuiIdx = Math.abs(
-          (currentGuiIdx - 1) % u.nodes.filter((n) => n.visible).length
-        );
+        currentGuiIdx = Math.abs((currentGuiIdx - 1) % visibleNodes.length);
         urutora.lm.setPosition(
-          u.nodes[currentGuiIdx].centerX() * urutora.utils.sx,
-          u.nodes[currentGuiIdx].centerY() * urutora.utils.sy
+          visibleNodes[currentGuiIdx].centerX() * urutora.utils.sx,
+          visibleNodes[currentGuiIdx].centerY() * urutora.utils.sy
         );
       }
       if (joystick.isGamepadReleased("dpdown")) {
-        currentGuiIdx = Math.abs((currentGuiIdx + 1) % u.nodes.length);
+        currentGuiIdx = Math.abs((currentGuiIdx + 1) % visibleNodes.length);
         urutora.lm.setPosition(
-          u.nodes[currentGuiIdx].centerX() * urutora.utils.sx,
-          u.nodes[currentGuiIdx].centerY() * urutora.utils.sy
+          visibleNodes[currentGuiIdx].centerX() * urutora.utils.sx,
+          visibleNodes[currentGuiIdx].centerY() * urutora.utils.sy
         );
       }
-      if (joystick.isGamepadDown("a")) {
-        const node = u.nodes[currentGuiIdx];
+      if (joystick.isActionDown("confirm")) {
+        const node = visibleNodes[currentGuiIdx];
         u.pressed(
           node.centerX() * urutora.utils.sx,
           node.centerY() * urutora.utils.sy,
           urutora.utils.mouseButtons.LEFT
         );
       }
-      if (joystick.isGamepadReleased("a")) {
-        const node = u.nodes[currentGuiIdx];
-        u.released(node.centerX() * urutora.utils.sx, node.centerY() * urutora.utils.sy);
+      if (joystick.isActionReleased("confirm")) {
+        const node = visibleNodes[currentGuiIdx];
+        u.released(
+          node.centerX() * urutora.utils.sx,
+          node.centerY() * urutora.utils.sy
+        );
       }
     }
     status = network.getStatus();
     if (status === LiaisonStatus.LIAISON_STATUS_CONNECTED) {
-    let receivedData = network.receiveData();
-    while (receivedData) {
-      const [type, content, peerId] = receivedData;
-      if (type === GameNetEventTypes.Connected) {
-        const p = this.ready(Input.registerNullJoystick());
-        p.peerId = peerId;
-        if (network.isClient()) {
-          p.id = 0; // server is always player 0
-        } else if (network.isServer()) {
-          // send the id to the client
-          network.sendData(GameNetEventTypes.Ready, "" + p.id, peerId);
+      let receivedData = network.receiveData();
+      while (receivedData) {
+        const [type, content, peerId] = receivedData;
+        if (type === GameNetEventTypes.Connected) {
+          const p = this.ready(Input.registerNullJoystick());
+          p.peerId = peerId;
+          if (network.isClient()) {
+            p.id = 0; // server is always player 0
+          } else if (network.isServer()) {
+            // send the id to the client
+            network.sendData(GameNetEventTypes.Ready, "" + p.id, peerId);
+          }
+        } else if (type === GameNetEventTypes.Start) {
+          // start the game
+          this.start = true;
+        } else if (type === GameNetEventTypes.Ready) {
+          // get the id from the server
+          if (network.isClient()) {
+            const id = parseInt(content);
+            this.joysticks.forEach((p) => {
+              if (p.player.peerId == null) {
+                p.player.id = id;
+              }
+            });
+          }
         }
-      } else if (type === GameNetEventTypes.Start) {
-        // start the game
-        this.start = true;
-      } else if (type === GameNetEventTypes.Ready) {
-        // get the id from the server
-        if (network.isClient()) {
-          const id = parseInt(content);
-          this.joysticks.forEach((p) => {
-            if (p.player.peerId == null) {
-              p.player.id = id;
-            }
-          });
-        }
+        receivedData = network.receiveData();
       }
-      receivedData = network.receiveData();
-    }
     }
     this.starField.update(dt);
     network.update(dt);
