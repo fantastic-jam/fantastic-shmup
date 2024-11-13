@@ -310,6 +310,8 @@ function baseNode:performReleaseAction(data)
       self.type == utils.nodeTypes.IMAGE or
       self.type == utils.nodeTypes.ANIMATION then
         self.callback({ target = self })
+      elseif self.type == utils.nodeTypes.TEXT then
+        lk.setTextInput(true)
       elseif self.type == utils.nodeTypes.TOGGLE then
         self:change()
         self.callback({ target = self, value = self.value })

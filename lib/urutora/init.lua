@@ -1,5 +1,6 @@
 _G.lg = love.graphics
 _G.lm = love.mouse
+_G.lk = love.keyboard
 
 if (love._console ~= nil) then
     _G.lm = {};
