@@ -41,7 +41,7 @@ export class RemappedJoystick implements EventEmitterJoystick {
       if (remap) {
         this.eventEmitter.pushEvent(new SimpleEvent("pressed", [this, remap]));
       } else {
-        this.eventEmitter.pushEvent(new SimpleEvent("released", [this, b]));
+        this.eventEmitter.pushEvent(new SimpleEvent("pressed", [this, b]));
       }
     });
     delegate.listen("released", (e) => {
