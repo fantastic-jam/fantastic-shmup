@@ -187,29 +187,29 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
         currentGuiIdx = Math.abs(
           (currentGuiIdx - 1) % u.nodes.filter((n) => n.visible).length
         );
-        love.mouse.setPosition(
-          u.nodes[currentGuiIdx].centerX() * u.utils.sx,
-          u.nodes[currentGuiIdx].centerY() * u.utils.sy
+        urutora.lm.setPosition(
+          u.nodes[currentGuiIdx].centerX() * urutora.utils.sx,
+          u.nodes[currentGuiIdx].centerY() * urutora.utils.sy
         );
       }
       if (joystick.isGamepadReleased("dpdown")) {
         currentGuiIdx = Math.abs((currentGuiIdx + 1) % u.nodes.length);
-        love.mouse.setPosition(
-          u.nodes[currentGuiIdx].centerX() * u.utils.sx,
-          u.nodes[currentGuiIdx].centerY() * u.utils.sy
+        urutora.lm.setPosition(
+          u.nodes[currentGuiIdx].centerX() * urutora.utils.sx,
+          u.nodes[currentGuiIdx].centerY() * urutora.utils.sy
         );
       }
       if (joystick.isGamepadDown("a")) {
         const node = u.nodes[currentGuiIdx];
         u.pressed(
-          node.centerX() * u.utils.sx,
-          node.centerY() * u.utils.sy,
-          u.utils.mouseButtons.LEFT
+          node.centerX() * urutora.utils.sx,
+          node.centerY() * urutora.utils.sy,
+          urutora.utils.mouseButtons.LEFT
         );
       }
       if (joystick.isGamepadReleased("a")) {
         const node = u.nodes[currentGuiIdx];
-        u.released(node.centerX() * u.utils.sx, node.centerY() * u.utils.sy);
+        u.released(node.centerX() * urutora.utils.sx, node.centerY() * urutora.utils.sy);
       }
     }
     let receivedData = network.receiveData();

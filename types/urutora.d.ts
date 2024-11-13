@@ -114,11 +114,13 @@ export interface Urutora {
   update(dt: number): void;
   draw(): void;
   nodes: Node[];
-  utils: Utils;
 }
 
 /** @noResolution */
 declare module "urutora" {
+  export const utils: Utils;
+  export const lm: typeof love.mouse;
+  export const lg: typeof love.graphics;
   /**
    * @customName new
    */

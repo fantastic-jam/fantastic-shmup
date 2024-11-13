@@ -19,6 +19,8 @@ local kat = require(modules .. 'katsudo')
 local urutora = class('urutora')
 urutora.utils = utils
 urutora.katsudo = kat
+urutora.lm = lm
+urutora.lg = lg
 
 function urutora.setDefaultFont(font)
   utils.default_font = font
