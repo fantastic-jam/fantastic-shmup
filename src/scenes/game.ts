@@ -21,7 +21,7 @@ export class GameScene implements Scene {
   music: Source;
   camera: Camera;
   ships = new Map<Player, Ship>();
-  networkStatus: LiaisonStatus = network.getStatus();
+  networkStatus: LiaisonStatus = network?.getStatus() ?? LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
 
   private newEnemy(id: number): void {
     const enemy = new Enemy1(
@@ -33,8 +33,8 @@ export class GameScene implements Scene {
       )
     );
     this.spriteEngine.addActor(enemy);
-    if (network.isServer()) {
-      network.sendData(GameNetEventTypes.SyncActor, enemy.serialize());
+    if (network?.isServer()) {
+      network?.sendData(GameNetEventTypes.SyncActor, enemy.serialize());
     }
   }
 
@@ -44,7 +44,7 @@ export class GameScene implements Scene {
     this.camera = new Camera();
     this.starField = new StarField(this.camera, 200);
     this.spriteEngine = new SpriteEngine();
-    if (!network.isClient()) {
+    if (!network?.isClient()) {
       for (let i = 0; i < enemyCount; i++) {
         this.newEnemy(idGenerator.next());
       }
@@ -53,7 +53,7 @@ export class GameScene implements Scene {
     this.music.setLooping(true);
     this.music.setVolume(0.2);
     this.music.play();
-    if (!network.isClient()) {
+    if (!network?.isClient()) {
       let idx = 0;
       for (const p of players) {
         const ship = new Ship(
@@ -69,12 +69,12 @@ export class GameScene implements Scene {
           const ship = e.getSource();
           ship.pos = new Vector2(100, 100);
           ship.setInvincible(3);
-          if (network.isServer()) {
-            network.sendData(GameNetEventTypes.SyncActor, ship.serialize());
+          if (network?.isServer()) {
+            network?.sendData(GameNetEventTypes.SyncActor, ship.serialize());
           }
         });
-        if (network.isServer()) {
-          network.sendData(GameNetEventTypes.SyncActor, ship.serialize());
+        if (network?.isServer()) {
+          network?.sendData(GameNetEventTypes.SyncActor, ship.serialize());
         }
       }
     }
@@ -109,7 +109,7 @@ export class GameScene implements Scene {
   }
 
   networkUpdate(dt: number): void {
-    let receivedData = network.receiveData();
+    let receivedData = network?.receiveData();
     while (receivedData) {
       const [type, content] = receivedData;
       if (type === GameNetEventTypes.Fire) {
@@ -190,12 +190,12 @@ export class GameScene implements Scene {
           }
         }
       }
-      receivedData = network.receiveData();
+      receivedData = network?.receiveData();
     }
   }
 
   update(dt: number): void {
-    this.networkStatus = network.getStatus();
+    this.networkStatus = network?.getStatus() ?? LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
     let idx = 0;
     for (const localPlayer of this.players.filter((p) => p.peerId == null)) {
       if (this.networkStatus === LiaisonStatus.LIAISON_STATUS_CONNECTED) {
@@ -206,7 +206,7 @@ export class GameScene implements Scene {
             (ship as unknown as any).lastPos?.x !== ship.pos.x ||
             (ship as unknown as any).lastPos?.y !== ship.pos.y
           ) {
-            network.sendData(
+            network?.sendData(
               GameNetEventTypes.Position,
               `${ship.id}|${ship.pos.x.toFixed(3)}|${ship.pos.y.toFixed(3)}`
             );
@@ -217,8 +217,8 @@ export class GameScene implements Scene {
       if (localPlayer.joystick.isGamepadDown("start") && localPlayer.isDead) {
         const ship = this.ships.get(localPlayer)!;
         this.spriteEngine.addActor(ship);
-        if (network.isServer()) {
-          network.sendData(GameNetEventTypes.SyncActor, "" + ship.id);
+        if (network?.isServer()) {
+          network?.sendData(GameNetEventTypes.SyncActor, "" + ship.id);
         }
       }
       if (localPlayer.joystick.isGamepadDown("back")) {
@@ -229,7 +229,7 @@ export class GameScene implements Scene {
     this.networkUpdate(dt);
     this.starField.update(dt);
     this.spriteEngine.update(dt);
-    network.update(dt);
+    network?.update(dt);
   }
   draw(screen?: Screen): void {
     if (screen !== "bottom") {

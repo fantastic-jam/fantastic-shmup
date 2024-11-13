@@ -35,7 +35,7 @@ export class WeaponMissile extends Actor implements Weapon {
       return false;
     }
     this.lastFired = love.timer.getTime();
-    if (!network.isClient()) {
+    if (!network?.isClient()) {
       this.spriteEngine.addActor(
         new Missile(
           idGenerator.next(),

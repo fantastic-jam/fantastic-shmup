@@ -11,7 +11,7 @@ declare global {
 
 declare module "love" {
   /**
-   * @noSelf 
+   * @noSelf
    */
   function draw(screen?: Screen): void;
   const _console: "3DS" | "Switch" | "WiiU" | undefined;
@@ -24,4 +24,36 @@ declare module "love.graphics" {
    * Stereoscopic depth is only for Nintendo 3DS. This function will always return zero on Nintendo 2DS family systems or other consoles.
    */
   const getDepth: (() => number) | undefined;
+}
+
+declare module "love.keyboard" {
+  interface TextInputOptions {
+    /**
+     * @description basic, numpad, and standard1
+     * @default "basic"
+     */
+    type?: "basic" | "numpad" | "standard";
+    /**
+     * @description Makes text hidden after entry
+     * @default false
+     */
+    password?: boolean;
+    /**
+     * @description Text to prompt for on input
+     * @default "Enter String"
+     */
+    hint?: string;
+    /**
+     * @description Maximum length of the input string
+     * @default 20
+     */
+    length?: number;
+  }
+
+  /**
+   * Enables or disables the text input.
+   * @param enable Whether to enable or disable text input.
+   * @param options Options for the text input.
+   */
+  function setTextInput(this: void, enable: boolean, options?: TextInputOptions): void;
 }

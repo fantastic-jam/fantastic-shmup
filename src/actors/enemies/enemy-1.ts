@@ -59,7 +59,7 @@ export class Enemy1 extends Actor implements Damageable {
     }
 
     // check collisions
-    if (!network.isClient()) {
+    if (!network?.isClient()) {
       for (const actor of this.spriteEngine.getActors()) {
         if (
           actor.collider &&
@@ -70,8 +70,8 @@ export class Enemy1 extends Actor implements Damageable {
         ) {
           (actor as unknown as Damageable).damage(this.parent, 100);
           this.respawn();
-          if (network.isServer()) {
-            network.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          if (network?.isServer()) {
+            network?.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
           }
         }
       }
@@ -84,8 +84,8 @@ export class Enemy1 extends Actor implements Damageable {
     this.pos.y = love.math.random(config.screenHeight);
     this.y = this.pos.y;
     this.randCos = love.math.random(0, 500);
-    if (network.isServer()) {
-      network.sendData(GameNetEventTypes.SyncActor, this.serialize());
+    if (network?.isServer()) {
+      network?.sendData(GameNetEventTypes.SyncActor, this.serialize());
     }
   }
 

@@ -43,8 +43,8 @@ export class Missile extends Actor {
       collider,
       parent
     );
-    if (network.isServer()) {
-      network.sendData(GameNetEventTypes.SyncActor, this.serialize());
+    if (network?.isServer()) {
+      network?.sendData(GameNetEventTypes.SyncActor, this.serialize());
     }
   }
 
@@ -56,7 +56,7 @@ export class Missile extends Actor {
     }
 
     // check collisions
-    if (!network.isClient()) {
+    if (!network?.isClient()) {
       for (const actor of this.spriteEngine.getActors()) {
         if (
           actor.collider &&
@@ -67,8 +67,8 @@ export class Missile extends Actor {
         ) {
           (actor as unknown as Damageable).damage(this.parent, 100);
           this.spriteEngine.removeActor(this);
-          if (network.isServer()) {
-            network.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          if (network?.isServer()) {
+            network?.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
           }
         }
       }

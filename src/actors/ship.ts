@@ -168,7 +168,7 @@ export class Ship
 
     if (this.isMainWeaponFiring()) {
       const fired = this.weapons[this.currentWeapon].fire();
-      if (fired && this.player.isLocal() && network.isClient()) {
+      if (fired && this.player.isLocal() && network?.isClient()) {
         network.sendData(GameNetEventTypes.Fire, `${this.id}|fire`);
       }
     }
@@ -181,10 +181,10 @@ export class Ship
       weaponIdx = Math.abs((this.currentWeapon - 1) % this.weapons.length);
     }
     if (weaponIdx !== this.currentWeapon) {
-      if (!network.isClient()) {
+      if (!network?.isClient()) {
         this.currentWeapon = weaponIdx;
       }
-      if (network.isClient() || network.isServer()) {
+      if (network?.isClient() || network?.isServer()) {
         network.sendData(
           GameNetEventTypes.ChangeWeapon,
           `${this.id}|${weaponIdx}`

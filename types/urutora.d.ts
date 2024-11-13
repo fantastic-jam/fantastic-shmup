@@ -57,6 +57,10 @@ export interface Label extends Node {
   text: string;
 }
 
+export interface Text extends Node {
+  text: string;
+}
+
 export interface Utils {
   default_font: any;
   nodeTypes: {
@@ -88,12 +92,11 @@ export interface Utils {
 }
 
 export interface Urutora {
-  /** @noSelf */
-  button(props: Partial<Button>): Button;
-  /** @noSelf  */
-  setDefaultFont(font: any): void;
-  /** @noSelf  */
-  setDimensions(x: number, y: number, scaleX: number, scaleY: number): void;
+  /** nodes */
+  button(this: void, props: Partial<Button>): Button;
+  text(this: void, props: Partial<Text>): Button;
+  setDefaultFont(this: void, font: any): void;
+  setDimensions(this: void, x: number, y: number, scaleX: number, scaleY: number): void;
   add(component: any): void;
   remove(component: any): void;
   getByTag(tag: string): any;

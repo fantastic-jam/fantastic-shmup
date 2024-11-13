@@ -26,7 +26,7 @@ export class WeaponGun extends Actor implements Weapon {
       return false;
     }
     this.lastFired = love.timer.getTime();
-    if (!network.isClient()) {
+    if (!network?.isClient()) {
       this.spriteEngine.addActor(
         new Bullet(
           idGenerator.next(),

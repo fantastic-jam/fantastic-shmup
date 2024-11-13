@@ -1,14 +1,14 @@
 import { Network } from "../engine/network";
 import { NetEventTypes } from "../engine/network/utils";
 
-export let network: Network;
-if (love._console === "3DS") {
-  const UdsNetwork = require("../engine/network/uds-network").UdsNetwork;
-  network = new UdsNetwork();
-} else {
-  const EnetNetwork = require("../engine/network/enet-network").EnetNetwork;
-  network = new EnetNetwork();
-}
+export let network: Network | undefined;
+// if (love._console === "3DS") {
+//   const UdsNetwork = require("../engine/network/uds-network").UdsNetwork;
+//   network = new UdsNetwork();
+// } else {
+//   const EnetNetwork = require("../engine/network/enet-network").EnetNetwork;
+//   network = new EnetNetwork();
+// }
 
 export enum GameNetEventTypes {
   // default events

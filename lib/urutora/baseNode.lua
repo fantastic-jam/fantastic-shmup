@@ -311,7 +311,10 @@ function baseNode:performReleaseAction(data)
       self.type == utils.nodeTypes.ANIMATION then
         self.callback({ target = self })
       elseif self.type == utils.nodeTypes.TEXT then
-        lk.setTextInput(true)
+        if (lk.hasScreenKeyboard()) then
+          lk.setTextInput(true)
+          self.text = '' -- clear text to allow new input
+        end
       elseif self.type == utils.nodeTypes.TOGGLE then
         self:change()
         self.callback({ target = self, value = self.value })

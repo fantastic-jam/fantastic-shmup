@@ -23,9 +23,13 @@ export class ExtendedJoystick<T extends string>
   private actionPressed: Partial<Record<T, boolean>> = {};
   private gamepadReleased: Partial<Record<GamepadButton, boolean>> = {};
   private actionReleased: Partial<Record<T, boolean>> = {};
-  private eventEmitter = new SimpleEventEmitter<
+  private gamepadEventEmitter = new SimpleEventEmitter<
     "pressed" | "released",
     [Joystick, GamepadButton]
+  >();
+  private actionEventEmitter = new SimpleEventEmitter<
+    "actionPressed" | "actionReleased",
+    [Joystick, T]
   >();
 
   public constructor(
@@ -44,15 +48,17 @@ export class ExtendedJoystick<T extends string>
     delegate.listen("pressed", (e) => {
       const [_j, b] = e.getSource();
       this.gamepadPressed[b] = true;
-      if (inverseMapping[b]) {
-        this.actionPressed[inverseMapping[b]] = true;
+      const action = inverseMapping[b];
+      if (action != null) {
+        this.actionPressed[action] = true;
       }
     });
     delegate.listen("released", (e) => {
       const [_j, b] = e.getSource();
       this.gamepadReleased[b] = true;
-      if (inverseMapping[b]) {
-        this.actionReleased[inverseMapping[b]] = true;
+      const action = inverseMapping[b];
+      if (action != null) {
+        this.actionReleased[action] = true;
       }
     });
   }
@@ -61,9 +67,9 @@ export class ExtendedJoystick<T extends string>
   // listen(eventType: "actionPressed" | "actionReleased", callback: any);
   listen(eventType: any, callback: any): void {
     if (eventType === "actionPressed" || eventType === "actionReleased") {
-      return this.eventEmitter.listen(eventType, callback as any);
+      return this.actionEventEmitter.listen(eventType, callback);
     }
-    return this.eventEmitter.listen(eventType, callback);
+    return this.gamepadEventEmitter.listen(eventType, callback);
   }
 
   resetPressedStates(): void {
@@ -77,10 +83,17 @@ export class ExtendedJoystick<T extends string>
     return this.isGamepadDown(...actions.map((action) => this.mapping[action]));
   }
 
+  isActionPressed(...actions: T[]): boolean {
+    return actions.some((action) => this.actionPressed[action]);
+  }
+
   isActionReleased(...actions: T[]): boolean {
     return actions.some((action) => this.actionReleased[action]);
   }
 
+  isGamepadPressed(...buttons: GamepadButton[]): boolean {
+    return buttons.some((button) => this.gamepadPressed[button]);
+  }
   isGamepadReleased(...buttons: GamepadButton[]): boolean {
     return buttons.some((button) => this.gamepadReleased[button]);
   }

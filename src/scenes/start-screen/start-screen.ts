@@ -1,49 +1,24 @@
 import { Source } from "love.audio";
 import { Screen } from "love.graphics";
-import { GamepadButton, Joystick } from "love.joystick";
+import { Joystick } from "love.joystick";
 import * as urutora from "urutora";
-import { Urutora } from "urutora";
-import { config } from "../conf";
-import { Camera } from "../engine/camera";
+import { config } from "../../conf";
+import { Camera } from "../../engine/camera";
 import {
   Event,
   EventEmitter,
   SimpleEvent,
   SimpleEventEmitter,
-} from "../engine/event";
-import { ExtendedJoystick } from "../engine/input/extended-joystick";
-import { Input, InputActions } from "../engine/input/input";
-import { LiaisonMode, LiaisonStatus } from "../engine/network";
-import { Scene } from "../engine/scene";
-import { Player } from "../player";
-import { StarField } from "../world/starfield";
-import { GameNetEventTypes, network } from "./network";
-const u: Urutora = (urutora as any).new();
-u.setDimensions(0, 0, 4, 4);
-const proggyTiny = love.graphics.newFont(
-  "/assets/fonts/proggy/ProggyTiny.ttf",
-  16
-);
-u.setDefaultFont(proggyTiny);
-love.graphics.setFont(proggyTiny);
+} from "../../engine/event";
+import { ExtendedJoystick } from "../../engine/input/extended-joystick";
+import { Input, InputActions } from "../../engine/input/input";
+import { LiaisonMode, LiaisonStatus } from "../../engine/network";
+import { Scene } from "../../engine/scene";
+import { u } from "../../gui";
+import { Player } from "../../player";
+import { StarField } from "../../world/starfield";
+import { GameNetEventTypes, network } from "../network";
 
-love.mousepressed = (x: number, y: number, button: number) =>
-  u.pressed(x, y, button);
-love.mousemoved = (x: number, y: number, dx: number, dy: number) =>
-  u.moved(x, y, dx, dy);
-love.mousereleased = (x: number, y: number, _button: number) =>
-  u.released(x, y);
-love.textinput = (text: string) => u.textinput(text);
-love.keypressed = (k: string, scancode: string, isrepeat: boolean) =>
-  u.keypressed(k, scancode, isrepeat);
-love.wheelmoved = (x: number, y: number) => u.wheelmoved(x, y);
-love.gamepadpressed = ((cb) => {
-  return function (j: Joystick, b: GamepadButton) {
-    if (cb) {
-      cb(j, b);
-    }
-  };
-})(love.gamepadpressed);
 let currentGuiIdx = 0;
 
 const playerIdGenerator = {
@@ -54,13 +29,15 @@ const playerIdGenerator = {
 };
 
 let status = LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
-export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
+export class StartScreenScene
+  implements Scene, EventEmitter<"start", StartScreenScene>
+{
   music: Source;
   joysticks = new Map<
     ExtendedJoystick<InputActions>,
-    { player: Player; readyTime: number }
+    { player: Player; readyState: boolean }
   >();
-  private emitter = new SimpleEventEmitter<"start", MenuScene>();
+  private emitter = new SimpleEventEmitter<"start", StartScreenScene>();
   private joystickAddedEvents: Joystick[] = [];
   private starField: StarField;
   private start = false;
@@ -90,10 +67,12 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       startButton.enabled = this.getPlayers().length > 0;
     };
     startButton.action((e: any) => {
-      if (!network.isClient()) {
+      print("!network?.isClient()", !network?.isClient());
+      if (!network?.isClient()) {
         this.start = true;
-        if (network.isServer()) {
-          network.sendData(GameNetEventTypes.Start, "start");
+        print("start", this.start);
+        if (network?.isServer()) {
+          network?.sendData(GameNetEventTypes.Start, "start");
         }
       }
     });
@@ -110,13 +89,15 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
     });
     hostButton.action((e: any) => {
       if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
-        network.init(config.network.passphrase);
+        network?.init(config.network?.passphrase);
         status = LiaisonStatus.LIAISON_STATUS_PENDING;
-        network.host();
-        network.waitConnectionStatusEvent(false, false);
+        network?.host();
+        network?.waitConnectionStatusEvent(false, false);
       }
       hostButton.visible = false;
+      hostButton.enabled = false;
       joinButton.visible = false;
+      joinButton.enabled = false;
     });
     const joinButton = u.button({
       text: "Join",
@@ -128,18 +109,28 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
     });
     joinButton.action((e: any) => {
       if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
-        network.init(config.network.passphrase);
+        network?.init(config.network?.passphrase);
         status = LiaisonStatus.LIAISON_STATUS_PENDING;
-        network.join();
+        network?.join();
       }
       startButton.disable();
       startButton.text = "Waiting for host";
       hostButton.visible = false;
+      hostButton.enabled = false;
       joinButton.visible = false;
+      joinButton.enabled = false;
+    });
+    const text = u.text({
+      text: "host",
+      x: 100,
+      y: (yPos += 40),
+      w: 200,
+      h: 30,
     });
     u.add(startButton);
     u.add(hostButton);
     u.add(joinButton);
+    u.add(text);
   }
 
   getPlayers(): Player[] {
@@ -152,20 +143,20 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
 
   listen(
     eventType: "start",
-    callback: (e: Event<"start", MenuScene>) => void
+    callback: (e: Event<"start", StartScreenScene>) => void
   ): void {
     return this.emitter.listen(eventType, callback);
   }
 
   ready(joystick: ExtendedJoystick<InputActions>, peerId?: number): Player {
-    this.startButton.enabled = true;
     const p = this.joysticks.get(joystick);
     if (p == null) {
       const newP = {
         player: new Player(playerIdGenerator.next(), joystick, peerId),
-        readyTime: love.timer.getTime(),
+        readyState: true,
       };
       this.joysticks.set(joystick, newP);
+      this.startButton.enabled = this.getPlayers().length > 0;
       return newP.player;
     }
     return p.player;
@@ -199,8 +190,9 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
           visibleNodes[currentGuiIdx].centerY() * urutora.utils.sy
         );
       }
-      if (joystick.isActionDown("confirm")) {
+      if (joystick.isActionPressed("confirm")) {
         const node = visibleNodes[currentGuiIdx];
+        print("pressed !");
         u.pressed(
           node.centerX() * urutora.utils.sx,
           node.centerY() * urutora.utils.sy,
@@ -209,32 +201,33 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       }
       if (joystick.isActionReleased("confirm")) {
         const node = visibleNodes[currentGuiIdx];
+        print("released !");
         u.released(
           node.centerX() * urutora.utils.sx,
           node.centerY() * urutora.utils.sy
         );
       }
     }
-    status = network.getStatus();
+    status = network?.getStatus() || LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
     if (status === LiaisonStatus.LIAISON_STATUS_CONNECTED) {
-      let receivedData = network.receiveData();
+      let receivedData = network?.receiveData();
       while (receivedData) {
         const [type, content, peerId] = receivedData;
         if (type === GameNetEventTypes.Connected) {
           const p = this.ready(Input.registerNullJoystick());
           p.peerId = peerId;
-          if (network.isClient()) {
+          if (network?.isClient()) {
             p.id = 0; // server is always player 0
-          } else if (network.isServer()) {
+          } else if (network?.isServer()) {
             // send the id to the client
-            network.sendData(GameNetEventTypes.Ready, "" + p.id, peerId);
+            network?.sendData(GameNetEventTypes.Ready, "" + p.id, peerId);
           }
         } else if (type === GameNetEventTypes.Start) {
           // start the game
           this.start = true;
         } else if (type === GameNetEventTypes.Ready) {
           // get the id from the server
-          if (network.isClient()) {
+          if (network?.isClient()) {
             const id = parseInt(content);
             this.joysticks.forEach((p) => {
               if (p.player.peerId == null) {
@@ -243,18 +236,18 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
             });
           }
         }
-        receivedData = network.receiveData();
+        receivedData = network?.receiveData();
       }
     }
     this.starField.update(dt);
-    network.update(dt);
+    network?.update(dt);
   }
   sendJoys() {
     if (
       status === LiaisonStatus.LIAISON_STATUS_PENDING &&
-      network.getMode() === LiaisonMode.LIAISON_MODE_SERVER
+      network?.getMode() === LiaisonMode.LIAISON_MODE_SERVER
     ) {
-      network.waitConnectionStatusEvent(false, false);
+      network?.waitConnectionStatusEvent(false, false);
     }
   }
 
@@ -268,11 +261,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       love.graphics.print(liaisonResult, 10, 10);
 
       this.joysticks.forEach((p) => {
-        if (love.timer.getTime() - p.readyTime < 1) {
-          love.graphics.setColor(0.6, 0.6, 0.3);
-        } else {
-          love.graphics.setColor(1, 1, 1);
-        }
+        love.graphics.setColor(1, 1, 1);
         love.graphics.print(
           "ready",
           10 + p.player.id * 50,

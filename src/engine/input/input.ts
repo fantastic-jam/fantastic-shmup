@@ -30,17 +30,17 @@ export type GamepadActionMappings = Record<InputActions, GamepadButton>;
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Input {
-  private static gamepadEmitter = new SimpleEventEmitter<
+  public static gamepadEmitter = new SimpleEventEmitter<
     "gamepadpressed" | "gamepadreleased",
     [Joystick, GamepadButton]
   >();
-  private static keyboardEmitter = new SimpleEventEmitter<
+  public static keyboardEmitter = new SimpleEventEmitter<
     "keypressed" | "keyreleased",
     [KeyConstant, Scancode, boolean | undefined]
   >();
-  private static keyboard: ExtendedJoystick<string>;
+  private static keyboard: ExtendedJoystick<InputActions>;
 
-  private static joysticks: ExtendedJoystick<string>[] = [];
+  private static joysticks: ExtendedJoystick<InputActions>[] = [];
   private static gamepadActionMappings: GamepadActionMappings;
   private static nintendoGamepads: Record<string, string> = {
     "{B58A259A-13AA-46E0-BDCB-31898EDAB24E}": "NINTENDO_3DS",
