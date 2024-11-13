@@ -1,6 +1,11 @@
+import { network } from "./scenes/network";
+
 export const config = {
   screenWidth: 400,
   screenHeight: 240,
+  network: {
+    passphrase: "fantastic shmup c186093cd2652741",
+  },
 };
 
 love.conf = (config) => {

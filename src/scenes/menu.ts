@@ -75,7 +75,6 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
     love.joystickadded = (j) => {
       this.joystickAddedEvents.push(j);
     };
-    network.init("udsdemo passphrase c186093cd2652741");
     let yPos = 40;
     const startButton = u.button({
       tag: "start",
@@ -111,6 +110,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
     });
     hostButton.action((e: any) => {
       if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
+        network.init(config.network.passphrase);
         status = LiaisonStatus.LIAISON_STATUS_PENDING;
         network.host();
         network.waitConnectionStatusEvent(false, false);
@@ -128,6 +128,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
     });
     joinButton.action((e: any) => {
       if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
+        network.init(config.network.passphrase);
         status = LiaisonStatus.LIAISON_STATUS_PENDING;
         network.join();
       }
@@ -212,6 +213,8 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
         u.released(node.centerX() * urutora.utils.sx, node.centerY() * urutora.utils.sy);
       }
     }
+    status = network.getStatus();
+    if (status === LiaisonStatus.LIAISON_STATUS_CONNECTED) {
     let receivedData = network.receiveData();
     while (receivedData) {
       const [type, content, peerId] = receivedData;
@@ -240,7 +243,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       }
       receivedData = network.receiveData();
     }
-    status = network.getStatus();
+    }
     this.starField.update(dt);
     network.update(dt);
   }
