@@ -90,6 +90,7 @@ export interface Utils {
 export interface Urutora {
   /** @noSelf */
   button(props: Partial<Button>): Button;
+  /** @noSelf  */
   setDefaultFont(font: any): void;
   /** @noSelf  */
   setDimensions(x: number, y: number, scaleX: number, scaleY: number): void;

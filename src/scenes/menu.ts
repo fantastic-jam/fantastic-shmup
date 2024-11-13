@@ -20,6 +20,12 @@ import { StarField } from "../world/starfield";
 import { GameNetEventTypes, network } from "./network";
 const u: Urutora = (urutora as any).new();
 u.setDimensions(0, 0, 4, 4);
+const proggyTiny = love.graphics.newFont(
+  "/assets/fonts/proggy/ProggyTiny.ttf",
+  16
+);
+u.setDefaultFont(proggyTiny);
+love.graphics.setFont(proggyTiny);
 
 love.mousepressed = (x: number, y: number, button: number) =>
   u.pressed(x, y, button);
@@ -70,13 +76,14 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       this.joystickAddedEvents.push(j);
     };
     network.init("udsdemo passphrase c186093cd2652741");
-    let yPos = 70;
+    let yPos = 40;
     const startButton = u.button({
       tag: "start",
       text: "Start",
       x: 100,
-      y: (yPos += 30),
+      y: (yPos += 40),
       w: 200,
+      h: 30,
       idx: 0,
     });
     startButton.center();
@@ -97,8 +104,9 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       tag: "host",
       text: "Host",
       x: 100,
-      y: (yPos += 30),
+      y: (yPos += 40),
       w: 200,
+      h: 30,
       idx: 1,
     });
     hostButton.action((e: any) => {
@@ -113,8 +121,9 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
     const joinButton = u.button({
       text: "Join",
       x: 100,
-      y: (yPos += 30),
+      y: (yPos += 40),
       w: 200,
+      h: 30,
       idx: 1,
     });
     joinButton.action((e: any) => {
@@ -122,6 +131,8 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
         status = LiaisonStatus.LIAISON_STATUS_PENDING;
         network.join();
       }
+      startButton.disable();
+      startButton.text = "Waiting for host";
       hostButton.visible = false;
       joinButton.visible = false;
     });
@@ -264,6 +275,12 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
         );
         love.graphics.setColor(1, 1, 1);
       });
+      love.graphics.print(
+        "<press start>",
+        10 + this.joysticks.size * 50,
+        config.screenHeight - 30
+      );
+
       u.draw();
     }
   }
