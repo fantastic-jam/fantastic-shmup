@@ -3,13 +3,17 @@ _G.lm = love.mouse
 
 if (love._console ~= nil) then
     _G.lm = {};
+    local pos = {0, 0};
     lg.newShader = function(code)
         return code
     end
     lg.setShader = function(shader)
     end
     lm.getPosition = function()
-        return 0, 0
+        return pos[1], pos[2]
+    end
+    lm.setPosition = function(x, y)
+        pos = {x, y}
     end
 end
 

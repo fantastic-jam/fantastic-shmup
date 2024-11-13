@@ -73,7 +73,6 @@ export class EnetNetwork implements Network {
       const peer = this.peers.idToPeer.get(peerId);
       if (peer) {
         const formattedData = formatData(type, data);
-        print(`sending ${formattedData} to ${peerId}`);
         peer.send(formattedData);
         return;
       }
@@ -92,7 +91,6 @@ export class EnetNetwork implements Network {
       return [...data, peerId];
     } else if (event?.type === "connect") {
       const peerId = peerIdGenerator.next();
-      print(`connected ${peerId}`);
       this.peers.add(peerId, event.peer);
       return [NetEventTypes.Connected, "", peerId];
     } else if (event?.type === "disconnect") {

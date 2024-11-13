@@ -274,7 +274,6 @@ function urutora:update(dt)
 end
 
 function urutora:pressed(x, y, button)
-  print("pressed")
   if not (button == utils.mouseButtons.LEFT) then return end
   self.focused_node = nil
   for _, v in ipairs(self.nodes) do

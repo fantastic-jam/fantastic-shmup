@@ -1,6 +1,8 @@
 import { Source } from "love.audio";
 import { Screen } from "love.graphics";
-import { Joystick } from "love.joystick";
+import { GamepadButton, Joystick } from "love.joystick";
+import * as urutora from "urutora";
+import { Urutora } from "urutora";
 import { config } from "../conf";
 import { Camera } from "../engine/camera";
 import {
@@ -12,11 +14,31 @@ import {
 import { ExtendedJoystick } from "../engine/input/extended-joystick";
 import { Input, InputActions } from "../engine/input/input";
 import { LiaisonMode, LiaisonStatus } from "../engine/network";
-import { formatData, parseData } from "../engine/network/utils";
 import { Scene } from "../engine/scene";
+import { Player } from "../player";
 import { StarField } from "../world/starfield";
 import { GameNetEventTypes, network } from "./network";
-import { Player } from "../player";
+const u: Urutora = (urutora as any).new();
+u.setDimensions(0, 0, 4, 4);
+
+love.mousepressed = (x: number, y: number, button: number) =>
+  u.pressed(x, y, button);
+love.mousemoved = (x: number, y: number, dx: number, dy: number) =>
+  u.moved(x, y, dx, dy);
+love.mousereleased = (x: number, y: number, _button: number) =>
+  u.released(x, y);
+love.textinput = (text: string) => u.textinput(text);
+love.keypressed = (k: string, scancode: string, isrepeat: boolean) =>
+  u.keypressed(k, scancode, isrepeat);
+love.wheelmoved = (x: number, y: number) => u.wheelmoved(x, y);
+love.gamepadpressed = ((cb) => {
+  return function (j: Joystick, b: GamepadButton) {
+    if (cb) {
+      cb(j, b);
+    }
+  };
+})(love.gamepadpressed);
+let currentGuiIdx = 0;
 
 const playerIdGenerator = {
   next: () => {
@@ -36,6 +58,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
   private joystickAddedEvents: Joystick[] = [];
   private starField: StarField;
   private start = false;
+  private startButton: urutora.Button;
 
   constructor() {
     this.music = love.audio.newSource("assets/menu.ogg", "stream");
@@ -47,6 +70,64 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       this.joystickAddedEvents.push(j);
     };
     network.init("udsdemo passphrase c186093cd2652741");
+    let yPos = 70;
+    const startButton = u.button({
+      tag: "start",
+      text: "Start",
+      x: 100,
+      y: (yPos += 30),
+      w: 200,
+      idx: 0,
+    });
+    startButton.center();
+    startButton.update = (_dt) => {
+      startButton.enabled = this.getPlayers().length > 0;
+    };
+    startButton.action((e: any) => {
+      if (!network.isClient()) {
+        this.start = true;
+        if (network.isServer()) {
+          network.sendData(GameNetEventTypes.Start, "start");
+        }
+      }
+    });
+    this.startButton = startButton;
+
+    const hostButton = u.button({
+      tag: "host",
+      text: "Host",
+      x: 100,
+      y: (yPos += 30),
+      w: 200,
+      idx: 1,
+    });
+    hostButton.action((e: any) => {
+      if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
+        status = LiaisonStatus.LIAISON_STATUS_PENDING;
+        network.host();
+        network.waitConnectionStatusEvent(false, false);
+      }
+      hostButton.visible = false;
+      joinButton.visible = false;
+    });
+    const joinButton = u.button({
+      text: "Join",
+      x: 100,
+      y: (yPos += 30),
+      w: 200,
+      idx: 1,
+    });
+    joinButton.action((e: any) => {
+      if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
+        status = LiaisonStatus.LIAISON_STATUS_PENDING;
+        network.join();
+      }
+      hostButton.visible = false;
+      joinButton.visible = false;
+    });
+    u.add(startButton);
+    u.add(hostButton);
+    u.add(joinButton);
   }
 
   getPlayers(): Player[] {
@@ -65,6 +146,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
   }
 
   ready(joystick: ExtendedJoystick<InputActions>, peerId?: number): Player {
+    this.startButton.enabled = true;
     const p = this.joysticks.get(joystick);
     if (p == null) {
       const newP = {
@@ -73,16 +155,12 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       };
       this.joysticks.set(joystick, newP);
       return newP.player;
-    } else if (!network.isClient() && love.timer.getTime() - p.readyTime > 1) {
-      this.start = true;
-      if (network.isServer()) {
-        network.sendData(GameNetEventTypes.Start, "start");
-      }
     }
     return p.player;
   }
 
   update(dt: number): void {
+    u.update(dt);
     if (this.start) {
       this.emitter.pushEvent(new SimpleEvent("start", this));
       return;
@@ -93,6 +171,34 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
       }
       if (joystick.isGamepadReleased("back")) {
         love.event.quit(0);
+      }
+      if (joystick.isGamepadReleased("dpup")) {
+        currentGuiIdx = Math.abs(
+          (currentGuiIdx - 1) % u.nodes.filter((n) => n.visible).length
+        );
+        love.mouse.setPosition(
+          u.nodes[currentGuiIdx].centerX() * u.utils.sx,
+          u.nodes[currentGuiIdx].centerY() * u.utils.sy
+        );
+      }
+      if (joystick.isGamepadReleased("dpdown")) {
+        currentGuiIdx = Math.abs((currentGuiIdx + 1) % u.nodes.length);
+        love.mouse.setPosition(
+          u.nodes[currentGuiIdx].centerX() * u.utils.sx,
+          u.nodes[currentGuiIdx].centerY() * u.utils.sy
+        );
+      }
+      if (joystick.isGamepadDown("a")) {
+        const node = u.nodes[currentGuiIdx];
+        u.pressed(
+          node.centerX() * u.utils.sx,
+          node.centerY() * u.utils.sy,
+          u.utils.mouseButtons.LEFT
+        );
+      }
+      if (joystick.isGamepadReleased("a")) {
+        const node = u.nodes[currentGuiIdx];
+        u.released(node.centerX() * u.utils.sx, node.centerY() * u.utils.sy);
       }
     }
     let receivedData = network.receiveData();
@@ -128,18 +234,6 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
     network.update(dt);
   }
   sendJoys() {
-    this.joysticks.forEach((l, j) => {
-      if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
-        if (j.isGamepadDown("leftshoulder")) {
-          status = LiaisonStatus.LIAISON_STATUS_PENDING;
-          network.host();
-          network.waitConnectionStatusEvent(false, false);
-        } else if (j.isGamepadDown("rightshoulder")) {
-          status = LiaisonStatus.LIAISON_STATUS_PENDING;
-          network.join();
-        }
-      }
-    });
     if (
       status === LiaisonStatus.LIAISON_STATUS_PENDING &&
       network.getMode() === LiaisonMode.LIAISON_MODE_SERVER
@@ -170,6 +264,7 @@ export class MenuScene implements Scene, EventEmitter<"start", MenuScene> {
         );
         love.graphics.setColor(1, 1, 1);
       });
+      u.draw();
     }
   }
   unload(): void {
