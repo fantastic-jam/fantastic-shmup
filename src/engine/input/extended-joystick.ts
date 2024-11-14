@@ -36,12 +36,12 @@ export class ExtendedJoystick<T extends string>
     private delegate: EventEmitterJoystick,
     private mapping: Record<T, GamepadButton>
   ) {
-    const inverseMapping: Partial<Record<GamepadButton, T>> = {};
+    const inverseMapping: Partial<Record<GamepadButton, T[]>> = {};
     for (const key of Object.keys(this.mapping ?? {})) {
       const action = key as T;
       const btn = this.mapping[action];
       if (btn != null) {
-        inverseMapping[btn] = action;
+        inverseMapping[btn] = [...(inverseMapping[btn] ?? []), action];
       }
     }
 
@@ -50,7 +50,7 @@ export class ExtendedJoystick<T extends string>
       this.gamepadPressed[b] = true;
       const action = inverseMapping[b];
       if (action != null) {
-        this.actionPressed[action] = true;
+        action.forEach((a) => (this.actionPressed[a] = true));
       }
     });
     delegate.listen("released", (e) => {
@@ -58,7 +58,7 @@ export class ExtendedJoystick<T extends string>
       this.gamepadReleased[b] = true;
       const action = inverseMapping[b];
       if (action != null) {
-        this.actionReleased[action] = true;
+        action.forEach((a) => (this.actionReleased[a] = true));
       }
     });
   }
