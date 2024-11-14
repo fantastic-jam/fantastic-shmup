@@ -279,7 +279,7 @@ function panel:draw()
   end
   lg.push()
   lg.translate(tx, ty)
-  lg.intersectScissor(x - ox, y - oy, self.w, self.h)
+  lg.intersectScissor(x - ox, y - oy, self.w * utils.sx, self.h * utils.sy)
 
   _drawBg(self)
   for _, node in pairs(self.children) do
