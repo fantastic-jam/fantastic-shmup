@@ -18,6 +18,7 @@ import { u } from "../../gui";
 import { Player } from "../../player";
 import { StarField } from "../../world/starfield";
 import { GameNetEventTypes, network } from "../network";
+import { startScreenGui } from "./start-screen-gui";
 
 let currentGuiIdx = 0;
 
@@ -52,85 +53,35 @@ export class StartScreenScene
     love.joystickadded = (j) => {
       this.joystickAddedEvents.push(j);
     };
-    let yPos = 40;
-    const startButton = u.button({
-      tag: "start",
-      text: "Start",
-      x: 100,
-      y: (yPos += 40),
-      w: 200,
-      h: 30,
-      idx: 0,
-    });
-    startButton.center();
-    startButton.update = (_dt) => {
-      startButton.enabled = this.getPlayers().length > 0;
-    };
-    startButton.action((e: any) => {
-      print("!network?.isClient()", !network?.isClient());
-      if (!network?.isClient()) {
-        this.start = true;
-        print("start", this.start);
-        if (network?.isServer()) {
-          network?.sendData(GameNetEventTypes.Start, "start");
+    const panel = startScreenGui({
+      onStartAction: (e: any) => {
+        u.remove(panel);
+        if (!network?.isClient()) {
+          this.start = true;
+          if (network?.isServer()) {
+            network?.sendData(GameNetEventTypes.Start, "start");
+          }
         }
-      }
+      },
+      onHostAction: (e: any) => {
+        if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
+          network?.init(config.network?.passphrase);
+          status = LiaisonStatus.LIAISON_STATUS_PENDING;
+          network?.host();
+          network?.waitConnectionStatusEvent(false, false);
+        }
+      },
+      onJoinAction: (e: any) => {
+        if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
+          network?.init(config.network?.passphrase);
+          status = LiaisonStatus.LIAISON_STATUS_PENDING;
+          network?.join();
+        }
+      },
     });
-    this.startButton = startButton;
-
-    const hostButton = u.button({
-      tag: "host",
-      text: "Host",
-      x: 100,
-      y: (yPos += 40),
-      w: 200,
-      h: 30,
-      idx: 1,
-    });
-    hostButton.action((e: any) => {
-      if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
-        network?.init(config.network?.passphrase);
-        status = LiaisonStatus.LIAISON_STATUS_PENDING;
-        network?.host();
-        network?.waitConnectionStatusEvent(false, false);
-      }
-      hostButton.visible = false;
-      hostButton.enabled = false;
-      joinButton.visible = false;
-      joinButton.enabled = false;
-    });
-    const joinButton = u.button({
-      text: "Join",
-      x: 100,
-      y: (yPos += 40),
-      w: 200,
-      h: 30,
-      idx: 1,
-    });
-    joinButton.action((e: any) => {
-      if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
-        network?.init(config.network?.passphrase);
-        status = LiaisonStatus.LIAISON_STATUS_PENDING;
-        network?.join();
-      }
-      startButton.disable();
-      startButton.text = "Waiting for host";
-      hostButton.visible = false;
-      hostButton.enabled = false;
-      joinButton.visible = false;
-      joinButton.enabled = false;
-    });
-    const text = u.text({
-      text: "host",
-      x: 100,
-      y: (yPos += 40),
-      w: 200,
-      h: 30,
-    });
-    u.add(startButton);
-    u.add(hostButton);
-    u.add(joinButton);
-    u.add(text);
+    u.add(panel);
+    this.startButton = u.getByTag("start-button") as urutora.Button;
+    this.startButton.disable();
   }
 
   getPlayers(): Player[] {
@@ -156,19 +107,32 @@ export class StartScreenScene
         readyState: true,
       };
       this.joysticks.set(joystick, newP);
-      this.startButton.enabled = this.getPlayers().length > 0;
+      this.startButton.enable();
       return newP.player;
     }
     return p.player;
   }
 
   update(dt: number): void {
-    u.update(dt);
+    if (this.getPlayers().length <= 0) {
+      this.startButton.disable();
+    }
     if (this.start) {
       this.emitter.pushEvent(new SimpleEvent("start", this));
       return;
     }
-    const visibleNodes = u.nodes.filter((n) => n.visible);
+    const visibleNodes = u.nodes
+      .flatMap((n) =>
+        n.type === urutora.utils.nodeTypes.PANEL
+          ? [
+              n,
+              ...Object.entries((n as urutora.Panel).children)
+                .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+                .map(([k, v]) => v),
+            ]
+          : [n]
+      )
+      .filter((n) => n.visible && n.type !== urutora.utils.nodeTypes.PANEL);
     for (const joystick of Input.getJoysticks()) {
       if (joystick.isGamepadReleased("start")) {
         this.ready(joystick);
@@ -192,7 +156,6 @@ export class StartScreenScene
       }
       if (joystick.isActionPressed("confirm")) {
         const node = visibleNodes[currentGuiIdx];
-        print("pressed !");
         u.pressed(
           node.centerX() * urutora.utils.sx,
           node.centerY() * urutora.utils.sy,
@@ -201,7 +164,6 @@ export class StartScreenScene
       }
       if (joystick.isActionReleased("confirm")) {
         const node = visibleNodes[currentGuiIdx];
-        print("released !");
         u.released(
           node.centerX() * urutora.utils.sx,
           node.centerY() * urutora.utils.sy
@@ -242,19 +204,15 @@ export class StartScreenScene
     this.starField.update(dt);
     network?.update(dt);
   }
-  sendJoys() {
-    if (
-      status === LiaisonStatus.LIAISON_STATUS_PENDING &&
-      network?.getMode() === LiaisonMode.LIAISON_MODE_SERVER
-    ) {
-      network?.waitConnectionStatusEvent(false, false);
-    }
-  }
-
   draw(screen?: Screen): void {
     if (screen !== "bottom") {
       this.starField.draw();
-      this.sendJoys();
+      if (
+        status === LiaisonStatus.LIAISON_STATUS_PENDING &&
+        network?.getMode() === LiaisonMode.LIAISON_MODE_SERVER
+      ) {
+        network?.waitConnectionStatusEvent(false, false);
+      }
       const liaisonResult = ["not connected", "pending", "connected"][
         Math.max(Math.min(status, 2), 0)
       ];
@@ -274,8 +232,6 @@ export class StartScreenScene
         10 + this.joysticks.size * 50,
         config.screenHeight - 30
       );
-
-      u.draw();
     }
   }
   unload(): void {

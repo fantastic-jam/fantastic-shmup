@@ -87,7 +87,6 @@ export class EnetNetwork implements Network {
     if (event.type === "receive") {
       const peerId = this.peers.peerToId.get(event.peer)!;
       const data = parseData(event.data);
-      //print("received data", data.join("|"));
       return [...data, peerId];
     } else if (event?.type === "connect") {
       const peerId = peerIdGenerator.next();

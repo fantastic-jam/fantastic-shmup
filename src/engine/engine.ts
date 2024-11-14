@@ -19,6 +19,6 @@ export class Engine {
 
   public static update(dt: number, cb: (dt: number) => void) {
     cb(dt);
-    Input.update(dt);
+    Input.update(dt); // input update must be called after the main update
   }
 }

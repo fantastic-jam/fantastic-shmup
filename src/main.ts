@@ -2,17 +2,16 @@ import { Screen } from "love.graphics";
 
 import { config } from "./conf";
 import { Engine } from "./engine/engine";
+import { Input } from "./engine/input/input";
 import { Scene } from "./engine/scene";
 import { GameScene } from "./scenes/game";
 import { StartScreenScene } from "./scenes/start-screen/start-screen";
-import { Input } from "./engine/input/input";
 
 import * as urutora from "urutora";
-import { GamepadButton, Joystick } from "love.joystick";
 import { u } from "./gui";
 
 function initGui(u: urutora.Urutora, scale: number) {
-    u.setDimensions(0, 0, scale, scale);
+  u.setDimensions(0, 0, scale, scale);
   const proggyTiny = love.graphics.newFont(
     "/assets/fonts/proggy/ProggyTiny.ttf",
     16
@@ -32,13 +31,6 @@ function initGui(u: urutora.Urutora, scale: number) {
     u.keypressed(k, scancode, isrepeat!);
   });
   love.wheelmoved = (x: number, y: number) => u.wheelmoved(x, y);
-  love.gamepadpressed = ((cb) => {
-    return function (j: Joystick, b: GamepadButton) {
-      if (cb) {
-        cb(j, b);
-      }
-    };
-  })(love.gamepadpressed);
 }
 
 let scene: Scene;
@@ -64,13 +56,17 @@ love.load = () => {
 
 love.update = (dt) => {
   Engine.update(dt, (dt: number) => {
+    u.update(dt);
     scene?.update(dt);
   });
 };
 
+// todo use love.resize callback to update the scale and scissors
 love.draw = (screen?: Screen) => {
+  // todo use intersectScissor to clip the screen and allow resizing and fixing Switch screen resolution
   love.graphics.push();
   love.graphics.scale(scale);
   scene?.draw(screen);
+  u.draw();
   love.graphics.pop();
 };

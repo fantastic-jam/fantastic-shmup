@@ -1,5 +1,3 @@
-import { network } from "./scenes/network";
-
 export const config = {
   screenWidth: 400,
   screenHeight: 240,

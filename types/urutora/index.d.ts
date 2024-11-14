@@ -2,6 +2,7 @@ import { MouseButtonEnum, NodeTypeEnum } from "./urutora.utils";
 
 export type NodeType = `${NodeTypeEnum}`;
 export type MouseButton = `${MouseButtonEnum}`;
+export type ActionCallback = (this: void, e: any) => void;
 
 export interface Node {
   /** index */
@@ -20,7 +21,7 @@ export interface Node {
   visible: boolean;
 
   update?(dt: number): void;
-  action(cb: (this: void, e: any) => void): void;
+  action(cb: ActionCallback): void;
   activate(): void;
   center(): void;
   centerX(): number;
@@ -91,15 +92,31 @@ export interface Utils {
   defaultCurveSegments: number;
 }
 
+
+export interface Panel extends Node {
+  rows: number;
+  cols: number;
+  verticalScale: number;
+  horizontalScale: number;
+  scrollSpeed: number;
+  children: Record<number, Node>;
+  colspanAt(row: number, col: number, span: number): this;
+  rowspanAt(row: number, col: number, span: number): this;
+  addAt(row: number, col: number, component: Node): this;
+}
 export interface Urutora {
   /** nodes */
   button(this: void, props: Partial<Button>): Button;
   text(this: void, props: Partial<Text>): Button;
+  panel(this: void, props: Partial<Panel>): Panel;
+  label(this: void, props: Partial<Label>): Label;
+
+  /** methods */
   setDefaultFont(this: void, font: any): void;
   setDimensions(this: void, x: number, y: number, scaleX: number, scaleY: number): void;
   add(component: any): void;
   remove(component: any): void;
-  getByTag(tag: string): any;
+  getByTag(tag: string): Node;
   activateByTag(tag: string): Urutora;
   deactivateByTag(tag: string): Urutora;
   activateGroup(g: string): void;
