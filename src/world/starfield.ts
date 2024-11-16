@@ -51,10 +51,7 @@ export class StarField {
   }
 
   private setBackgroundColor() {
-    const cos = Math.round(5 + Math.cos(love.timer.getTime() * 0.1) * 5);
-    love.graphics.setBackgroundColor(
-      love.math.colorFromBytes(2 + cos, 4 + cos, 10 + cos)
-    );
+    love.graphics.setBackgroundColor(love.math.colorFromBytes(6, 8, 30));
   }
 
   public draw(screen?: Screen) {
