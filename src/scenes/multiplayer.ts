@@ -1,14 +1,7 @@
 import { Network } from "../engine/network";
 import { NetEventTypes } from "../engine/network/utils";
 
-export let network: Network | undefined;
-// if (love._console === "3DS") {
-//   const UdsNetwork = require("../engine/network/uds-network").UdsNetwork;
-//   network = new UdsNetwork();
-// } else {
-//   const EnetNetwork = require("../engine/network/enet-network").EnetNetwork;
-//   network = new EnetNetwork();
-// }
+export let multiplayer: {network: Network | undefined} = {network: undefined};
 
 export enum GameNetEventTypes {
   // default events
@@ -33,4 +26,17 @@ export enum GameNetEventTypes {
   Pause,
   Resume,
   Quit,
+}
+
+export function initNetwork() {
+  print("init network");
+  if (love._console === "3DS") {
+    const UdsNetwork = require("../engine/network/uds-network").UdsNetwork;
+    multiplayer.network = new UdsNetwork();
+    print("network", multiplayer);
+  } else {
+    const EnetNetwork = require("../engine/network/enet-network").EnetNetwork;
+    multiplayer.network = new EnetNetwork();
+    print("network", multiplayer);
+  }
 }

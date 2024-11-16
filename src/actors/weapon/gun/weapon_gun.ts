@@ -1,7 +1,7 @@
 import { Actor, idGenerator } from "../../../engine/actor";
 import { SpriteEngine } from "../../../engine/sprite-engine";
 import { Vector2 } from "../../../engine/tools";
-import { network } from "../../../scenes/network";
+import { multiplayer } from "../../../scenes/multiplayer";
 import { Weapon } from "../weapon";
 import { Bullet } from "./bullet";
 
@@ -26,7 +26,7 @@ export class WeaponGun extends Actor implements Weapon {
       return false;
     }
     this.lastFired = love.timer.getTime();
-    if (!network?.isClient()) {
+    if (!multiplayer.network?.isClient()) {
       this.spriteEngine.addActor(
         new Bullet(
           idGenerator.next(),

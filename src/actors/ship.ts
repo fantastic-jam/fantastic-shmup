@@ -14,7 +14,7 @@ import { SpriteEngine } from "../engine/sprite-engine";
 import { AnimatedSprite } from "../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../engine/tools";
 import { Player } from "../player";
-import { GameNetEventTypes, network } from "../scenes/network";
+import { GameNetEventTypes, multiplayer } from "../scenes/multiplayer";
 import { WeaponGun } from "./weapon/gun/weapon_gun";
 import { WeaponMissile } from "./weapon/missile/weapon_missile";
 import { Weapon } from "./weapon/weapon";
@@ -168,8 +168,8 @@ export class Ship
 
     if (this.isMainWeaponFiring()) {
       const fired = this.weapons[this.currentWeapon].fire();
-      if (fired && this.player.isLocal() && network?.isClient()) {
-        network.sendData(GameNetEventTypes.Fire, `${this.id}|fire`);
+      if (fired && this.player.isLocal() && multiplayer.network?.isClient()) {
+        multiplayer.sendData(GameNetEventTypes.Fire, `${this.id}|fire`);
       }
     }
 
@@ -181,11 +181,11 @@ export class Ship
       weaponIdx = Math.abs((this.currentWeapon - 1) % this.weapons.length);
     }
     if (weaponIdx !== this.currentWeapon) {
-      if (!network?.isClient()) {
+      if (!multiplayer.network?.isClient()) {
         this.currentWeapon = weaponIdx;
       }
-      if (network?.isClient() || network?.isServer()) {
-        network.sendData(
+      if (multiplayer.network?.isClient() || multiplayer.network?.isServer()) {
+        multiplayer.sendData(
           GameNetEventTypes.ChangeWeapon,
           `${this.id}|${weaponIdx}`
         );

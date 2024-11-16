@@ -50,13 +50,21 @@ export class StarField {
     return sysDepth * STEREOSCOPIC_EFFECT;
   }
 
+  private setBackgroundColor() {
+    const cos = Math.round(5 + Math.cos(love.timer.getTime() * 0.1) * 5);
+    love.graphics.setBackgroundColor(
+      love.math.colorFromBytes(2 + cos, 4 + cos, 10 + cos)
+    );
+  }
+
   public draw(screen?: Screen) {
+    this.setBackgroundColor();
     const scale = this.camera.scale ?? 1;
     const depthEffect = this.getSteroscopticEffect(screen);
 
     let brightness = MAX_BRIGHTNESS;
     for (const star of this.stars) {
-      brightness = star.pos.z/50;
+      brightness = star.pos.z / 50;
       love.graphics.setColor(brightness, brightness, brightness);
       const layerDepth = STAR_MAX_DEPTH - star.pos.z;
 

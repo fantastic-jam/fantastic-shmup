@@ -1,4 +1,5 @@
-import { MouseButtonEnum, NodeTypeEnum } from "./urutora.utils";
+import { Font } from "love.graphics";
+import { MouseButtonEnum, NodeTypeEnum, Style, Utils } from "./urutora.utils";
 
 export type NodeType = `${NodeTypeEnum}`;
 export type MouseButton = `${MouseButtonEnum}`;
@@ -26,7 +27,7 @@ export interface Node {
   center(): void;
   centerX(): number;
   centerY(): number;
-  setStyle(style: any, nodeType?: NodeType): this;
+  setStyle(style: Partial<Style>, nodeType?: NodeType): this;
   setEnabled(value: boolean): this;
   setVisible(value: boolean): this;
   deactivate(): this;
@@ -61,37 +62,6 @@ export interface Label extends Node {
 export interface Text extends Node {
   text: string;
 }
-
-export interface Utils {
-  default_font: any;
-  nodeTypes: {
-    LABEL: 1;
-    BUTTON: 2;
-    SLIDER: 3;
-    TOGGLE: 4;
-    TEXT: 5;
-    MULTI: 6;
-    PANEL: 7;
-    JOY: 8;
-    IMAGE: 9;
-    ANIMATION: 10;
-    PROGRESS_BAR: 11;
-  };
-  alignments: {
-    LEFT: "left";
-    CENTER: "center";
-    RIGHT: "right";
-  };
-  mouseButtons: {
-    LEFT: 1;
-    RIGHT: 2;
-  };
-  sx: number;
-  sy: number;
-  scrollSpeed: number;
-  defaultCurveSegments: number;
-}
-
 
 export interface Panel extends Node {
   rows: number;

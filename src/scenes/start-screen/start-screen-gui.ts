@@ -1,6 +1,6 @@
 import { ActionCallback } from "urutora";
-import { u } from "../../gui";
 import { config } from "../../conf";
+import { u } from "../../gui";
 
 export const startScreenGui = (
   options: {
@@ -16,10 +16,10 @@ export const startScreenGui = (
     // w: config.screenWidth * 1,
     // h: config.screenHeight * 1,
   });
-   (panel as any).horizontalScale = 2;
-   (panel as any).verticalScale = 2;
-panel.w = config.screenWidth;
-panel.h = config.screenHeight;
+  (panel as any).horizontalScale = 2;
+  (panel as any).verticalScale = 2;
+  panel.w = config.screenWidth;
+  panel.h = config.screenHeight;
 
   const startButton = u.button({
     tag: "start-button",
@@ -68,6 +68,13 @@ panel.h = config.screenHeight;
   const text = u.text({
     text: "host",
   });
+  const titleLabel = u.label({ text: "Fantastic Shmup" });
+  titleLabel.center();
+  titleLabel.setStyle({
+    font: love.graphics.newFont("/assets/fonts/proggy/ProggyTiny.ttf", 32),
+  });
+  panel.colspanAt(2, 1, 3);
+  panel.addAt(2, 1, titleLabel);
   panel.addAt(3, 2, startButton);
   panel.addAt(4, 2, hostButton);
   panel.addAt(5, 2, joinButton);

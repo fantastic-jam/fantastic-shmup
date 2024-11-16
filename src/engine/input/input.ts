@@ -14,8 +14,8 @@ function isNintendoOs(): boolean {
 }
 
 const standardMappings = {
-  confirm: "b",
-  cancel: "a",
+  confirm: "a",
+  cancel: "b",
 };
 
 const nintendoMappings = {

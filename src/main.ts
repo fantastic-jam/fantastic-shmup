@@ -36,6 +36,7 @@ function initGui(u: urutora.Urutora, scale: number) {
 let scene: Scene;
 let scale: number;
 love.load = () => {
+  //love.graphics.setBackgroundColor(love.math.colorFromBytes(2, 4, 10, 1));
   love.graphics.setDefaultFilter("nearest", "nearest");
   // automatic scale
   scale = Math.min(

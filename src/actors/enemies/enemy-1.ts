@@ -7,7 +7,7 @@ import { Engine } from "../../engine/engine";
 import { SpriteEngine } from "../../engine/sprite-engine";
 import { AnimatedSprite } from "../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../engine/tools";
-import { GameNetEventTypes, network } from "../../scenes/network";
+import { GameNetEventTypes, multiplayer } from "../../scenes/multiplayer";
 import { Ship } from "../ship";
 
 let image: Image;
@@ -59,7 +59,7 @@ export class Enemy1 extends Actor implements Damageable {
     }
 
     // check collisions
-    if (!network?.isClient()) {
+    if (!multiplayer.network?.isClient()) {
       for (const actor of this.spriteEngine.getActors()) {
         if (
           actor.collider &&
@@ -70,8 +70,8 @@ export class Enemy1 extends Actor implements Damageable {
         ) {
           (actor as unknown as Damageable).damage(this.parent, 100);
           this.respawn();
-          if (network?.isServer()) {
-            network?.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          if (multiplayer.network?.isServer()) {
+            multiplayer.network?.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
           }
         }
       }
@@ -84,8 +84,8 @@ export class Enemy1 extends Actor implements Damageable {
     this.pos.y = love.math.random(config.screenHeight);
     this.y = this.pos.y;
     this.randCos = love.math.random(0, 500);
-    if (network?.isServer()) {
-      network?.sendData(GameNetEventTypes.SyncActor, this.serialize());
+    if (multiplayer.network?.isServer()) {
+      multiplayer.network?.sendData(GameNetEventTypes.SyncActor, this.serialize());
     }
   }
 

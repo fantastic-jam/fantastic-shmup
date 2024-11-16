@@ -7,7 +7,7 @@ import { Engine } from "../../../engine/engine";
 import { SpriteEngine } from "../../../engine/sprite-engine";
 import { AnimatedSprite } from "../../../engine/sprite/animated-sprite";
 import { Rectangle, Vector2 } from "../../../engine/tools";
-import { GameNetEventTypes, network } from "../../../scenes/network";
+import { GameNetEventTypes, multiplayer } from "../../../scenes/multiplayer";
 
 let image: Image;
 Engine.preload(() => {
@@ -43,8 +43,8 @@ export class Missile extends Actor {
       collider,
       parent
     );
-    if (network?.isServer()) {
-      network?.sendData(GameNetEventTypes.SyncActor, this.serialize());
+    if (multiplayer.network?.isServer()) {
+      multiplayer.network?.sendData(GameNetEventTypes.SyncActor, this.serialize());
     }
   }
 
@@ -56,7 +56,7 @@ export class Missile extends Actor {
     }
 
     // check collisions
-    if (!network?.isClient()) {
+    if (!multiplayer.network?.isClient()) {
       for (const actor of this.spriteEngine.getActors()) {
         if (
           actor.collider &&
@@ -67,8 +67,8 @@ export class Missile extends Actor {
         ) {
           (actor as unknown as Damageable).damage(this.parent, 100);
           this.spriteEngine.removeActor(this);
-          if (network?.isServer()) {
-            network?.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
+          if (multiplayer.network?.isServer()) {
+            multiplayer.network?.sendData(GameNetEventTypes.RemoveActor, this.id.toString());
           }
         }
       }

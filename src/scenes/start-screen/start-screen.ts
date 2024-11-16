@@ -17,7 +17,7 @@ import { Scene } from "../../engine/scene";
 import { u } from "../../gui";
 import { Player } from "../../player";
 import { StarField } from "../../world/starfield";
-import { GameNetEventTypes, network } from "../network";
+import { GameNetEventTypes, initNetwork, multiplayer } from "../multiplayer";
 import { startScreenGui } from "./start-screen-gui";
 
 let currentGuiIdx = 0;
@@ -56,26 +56,28 @@ export class StartScreenScene
     const panel = startScreenGui({
       onStartAction: (e: any) => {
         u.remove(panel);
-        if (!network?.isClient()) {
+        if (!multiplayer.network?.isClient()) {
           this.start = true;
-          if (network?.isServer()) {
-            network?.sendData(GameNetEventTypes.Start, "start");
+          if (multiplayer.network?.isServer()) {
+            multiplayer.network?.sendData(GameNetEventTypes.Start, "start");
           }
         }
       },
       onHostAction: (e: any) => {
+        initNetwork();
         if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
-          network?.init(config.network?.passphrase);
+          multiplayer.network?.init(config.network?.passphrase);
           status = LiaisonStatus.LIAISON_STATUS_PENDING;
-          network?.host();
-          network?.waitConnectionStatusEvent(false, false);
+          multiplayer.network?.host();
+          multiplayer.network?.waitConnectionStatusEvent(false, false);
         }
       },
       onJoinAction: (e: any) => {
+        initNetwork();
         if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
-          network?.init(config.network?.passphrase);
+          multiplayer.network?.init(config.network?.passphrase);
           status = LiaisonStatus.LIAISON_STATUS_PENDING;
-          network?.join();
+          multiplayer.network?.join();
         }
       },
     });
@@ -121,7 +123,7 @@ export class StartScreenScene
       this.emitter.pushEvent(new SimpleEvent("start", this));
       return;
     }
-    const visibleNodes = u.nodes
+    const visibleWidgets = u.nodes
       .flatMap((n) =>
         n.type === urutora.utils.nodeTypes.PANEL
           ? [
@@ -132,7 +134,12 @@ export class StartScreenScene
             ]
           : [n]
       )
-      .filter((n) => n.visible && n.type !== urutora.utils.nodeTypes.PANEL);
+      .filter(
+        (n) =>
+          n.visible &&
+          n.type !== urutora.utils.nodeTypes.PANEL &&
+          n.type !== urutora.utils.nodeTypes.LABEL
+      );
     for (const joystick of Input.getJoysticks()) {
       if (joystick.isGamepadReleased("start")) {
         this.ready(joystick);
@@ -141,21 +148,21 @@ export class StartScreenScene
         love.event.quit(0);
       }
       if (joystick.isGamepadReleased("dpup")) {
-        currentGuiIdx = Math.abs((currentGuiIdx - 1) % visibleNodes.length);
+        currentGuiIdx = Math.abs((currentGuiIdx - 1) % visibleWidgets.length);
         urutora.lm.setPosition(
-          visibleNodes[currentGuiIdx].centerX() * urutora.utils.sx,
-          visibleNodes[currentGuiIdx].centerY() * urutora.utils.sy
+          visibleWidgets[currentGuiIdx].centerX() * urutora.utils.sx,
+          visibleWidgets[currentGuiIdx].centerY() * urutora.utils.sy
         );
       }
       if (joystick.isGamepadReleased("dpdown")) {
-        currentGuiIdx = Math.abs((currentGuiIdx + 1) % visibleNodes.length);
+        currentGuiIdx = Math.abs((currentGuiIdx + 1) % visibleWidgets.length);
         urutora.lm.setPosition(
-          visibleNodes[currentGuiIdx].centerX() * urutora.utils.sx,
-          visibleNodes[currentGuiIdx].centerY() * urutora.utils.sy
+          visibleWidgets[currentGuiIdx].centerX() * urutora.utils.sx,
+          visibleWidgets[currentGuiIdx].centerY() * urutora.utils.sy
         );
       }
       if (joystick.isActionPressed("confirm")) {
-        const node = visibleNodes[currentGuiIdx];
+        const node = visibleWidgets[currentGuiIdx];
         u.pressed(
           node.centerX() * urutora.utils.sx,
           node.centerY() * urutora.utils.sy,
@@ -163,33 +170,39 @@ export class StartScreenScene
         );
       }
       if (joystick.isActionReleased("confirm")) {
-        const node = visibleNodes[currentGuiIdx];
+        const node = visibleWidgets[currentGuiIdx];
         u.released(
           node.centerX() * urutora.utils.sx,
           node.centerY() * urutora.utils.sy
         );
       }
     }
-    status = network?.getStatus() || LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
+    status =
+      multiplayer.network?.getStatus() ||
+      LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
     if (status === LiaisonStatus.LIAISON_STATUS_CONNECTED) {
-      let receivedData = network?.receiveData();
+      let receivedData = multiplayer.network?.receiveData();
       while (receivedData) {
         const [type, content, peerId] = receivedData;
         if (type === GameNetEventTypes.Connected) {
           const p = this.ready(Input.registerNullJoystick());
           p.peerId = peerId;
-          if (network?.isClient()) {
+          if (multiplayer.network?.isClient()) {
             p.id = 0; // server is always player 0
-          } else if (network?.isServer()) {
+          } else if (multiplayer.network?.isServer()) {
             // send the id to the client
-            network?.sendData(GameNetEventTypes.Ready, "" + p.id, peerId);
+            multiplayer.network?.sendData(
+              GameNetEventTypes.Ready,
+              "" + p.id,
+              peerId
+            );
           }
         } else if (type === GameNetEventTypes.Start) {
           // start the game
           this.start = true;
         } else if (type === GameNetEventTypes.Ready) {
           // get the id from the server
-          if (network?.isClient()) {
+          if (multiplayer.network?.isClient()) {
             const id = parseInt(content);
             this.joysticks.forEach((p) => {
               if (p.player.peerId == null) {
@@ -198,26 +211,22 @@ export class StartScreenScene
             });
           }
         }
-        receivedData = network?.receiveData();
+        receivedData = multiplayer.network?.receiveData();
       }
     }
     this.starField.update(dt);
-    network?.update(dt);
+    multiplayer.network?.update(dt);
   }
   draw(screen?: Screen): void {
     if (screen !== "bottom") {
       this.starField.draw();
       if (
         status === LiaisonStatus.LIAISON_STATUS_PENDING &&
-        network?.getMode() === LiaisonMode.LIAISON_MODE_SERVER
+        multiplayer.network?.getMode() === LiaisonMode.LIAISON_MODE_SERVER
       ) {
-        network?.waitConnectionStatusEvent(false, false);
+        multiplayer.network?.waitConnectionStatusEvent(false, false);
       }
-      const liaisonResult = ["not connected", "pending", "connected"][
-        Math.max(Math.min(status, 2), 0)
-      ];
-      love.graphics.print(liaisonResult, 10, 10);
-
+      this.displayNetworkStatus();
       this.joysticks.forEach((p) => {
         love.graphics.setColor(1, 1, 1);
         love.graphics.print(
@@ -227,13 +236,23 @@ export class StartScreenScene
         );
         love.graphics.setColor(1, 1, 1);
       });
-      love.graphics.print(
+      urutora.utils.prettyPrint(
         "<press start>",
         10 + this.joysticks.size * 50,
-        config.screenHeight - 30
+        config.screenHeight - 30,
+        { fgColor: urutora.utils.style.fgColor }
       );
     }
   }
+  private displayNetworkStatus() {
+    if (multiplayer.network?.isServer() || multiplayer.network?.isClient()) {
+      const liaisonResult = ["not connected", "pending", "connected"][
+        Math.max(Math.min(status, 2), 0)
+      ];
+      love.graphics.print(liaisonResult, 10, 10);
+    }
+  }
+
   unload(): void {
     this.music.stop();
     this.music.release();
