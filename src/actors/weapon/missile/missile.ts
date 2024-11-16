@@ -14,11 +14,11 @@ Engine.preload(() => {
   image = love.graphics.newImage("assets/ship-missile.png");
 });
 
-export type DeserializedMissile = {
+export interface DeserializedMissile {
   id: number;
   pos: Vector2;
   parentId: number | undefined;
-};
+}
 
 export class Missile extends Actor {
   constructor(

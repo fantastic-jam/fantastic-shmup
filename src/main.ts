@@ -28,6 +28,7 @@ function initGui(u: urutora.Urutora, scale: number) {
   love.textinput = (text: string) => u.textinput(text);
   Input.keyboardEmitter.listen("keypressed", (event) => {
     const [k, scancode, isrepeat] = event.getSource();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     u.keypressed(k, scancode, isrepeat!);
   });
   love.wheelmoved = (x: number, y: number) => u.wheelmoved(x, y);

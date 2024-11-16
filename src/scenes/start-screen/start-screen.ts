@@ -54,7 +54,7 @@ export class StartScreenScene
       this.joystickAddedEvents.push(j);
     };
     const panel = startScreenGui({
-      onStartAction: (e: any) => {
+      onStartAction: (_e: unknown) => {
         u.remove(panel);
         if (!multiplayer.network?.isClient()) {
           this.start = true;
@@ -63,7 +63,7 @@ export class StartScreenScene
           }
         }
       },
-      onHostAction: (e: any) => {
+      onHostAction: (_e: unknown) => {
         initNetwork();
         if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
           multiplayer.network?.init(config.network?.passphrase);
@@ -72,7 +72,7 @@ export class StartScreenScene
           multiplayer.network?.waitConnectionStatusEvent(false, false);
         }
       },
-      onJoinAction: (e: any) => {
+      onJoinAction: (_e: unknown) => {
         initNetwork();
         if (status === LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED) {
           multiplayer.network?.init(config.network?.passphrase);
@@ -130,7 +130,7 @@ export class StartScreenScene
               n,
               ...Object.entries((n as urutora.Panel).children)
                 .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                .map(([k, v]) => v),
+                .map(([_k, v]) => v),
             ]
           : [n]
       )
@@ -178,7 +178,7 @@ export class StartScreenScene
       }
     }
     status =
-      multiplayer.network?.getStatus() ||
+      multiplayer.network?.getStatus() ??
       LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
     if (status === LiaisonStatus.LIAISON_STATUS_CONNECTED) {
       let receivedData = multiplayer.network?.receiveData();

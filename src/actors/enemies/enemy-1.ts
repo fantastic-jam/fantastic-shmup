@@ -15,12 +15,12 @@ Engine.preload(() => {
   image = love.graphics.newImage("assets/enemy-1.png");
 });
 
-export type DeserializedEnemy1 = {
+export interface DeserializedEnemy1 {
   id: number;
   pos: Vector2;
   y: number;
   randCos: number;
-};
+}
 
 export class Enemy1 extends Actor implements Damageable {
   private maxHealth = 100;

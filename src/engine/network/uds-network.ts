@@ -39,6 +39,7 @@ export class UdsNetwork implements Network {
     const data = liaison?.receiveData()?.data;
     return data ? [...parseData(data), 0] : undefined;
   }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   update(_dt: number): void {}
   deinit(): void {
     liaison?.deinit();

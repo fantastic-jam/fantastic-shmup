@@ -85,7 +85,8 @@ export class EnetNetwork implements Network {
       return undefined;
     }
     if (event.type === "receive") {
-      const peerId = this.peers.peerToId.get(event.peer)!;
+      const peerId = this.peers.peerToId.get(event.peer);
+      if (peerId == null) throw new Error("received message from unknown peer");
       const data = parseData(event.data);
       return [...data, peerId];
     } else if (event?.type === "connect") {
@@ -93,7 +94,9 @@ export class EnetNetwork implements Network {
       this.peers.add(peerId, event.peer);
       return [NetEventTypes.Connected, "", peerId];
     } else if (event?.type === "disconnect") {
-      const peerId = this.peers.peerToId.get(event.peer)!;
+      const peerId = this.peers.peerToId.get(event.peer);
+      if (peerId == null)
+        throw new Error("disconnect message from unknown peer");
       this.peers.removePeer(event.peer);
       return [NetEventTypes.Disconnected, "", peerId];
     }

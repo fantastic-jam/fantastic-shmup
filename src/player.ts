@@ -9,6 +9,6 @@ export class Player {
     public id: number,
     public joystick: ExtendedJoystick<InputActions>,
     public peerId?: number | undefined,
-    public isDead: boolean = false
+    public isDead = false
   ) {}
 }

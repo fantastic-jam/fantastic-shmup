@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
 import { Font } from "love.graphics";
 import { MouseButtonEnum, NodeTypeEnum, Style, Utils } from "./urutora.utils";
 
 export type NodeType = `${NodeTypeEnum}`;
 export type MouseButton = `${MouseButtonEnum}`;
-export type ActionCallback = (this: void, e: any) => void;
+export type ActionCallback = (this: void, e: unknown) => void;
 
 export interface Node {
   /** index */
@@ -82,10 +83,16 @@ export interface Urutora {
   label(this: void, props: Partial<Label>): Label;
 
   /** methods */
-  setDefaultFont(this: void, font: any): void;
-  setDimensions(this: void, x: number, y: number, scaleX: number, scaleY: number): void;
-  add(component: any): void;
-  remove(component: any): void;
+  setDefaultFont(this: void, font: Font): void;
+  setDimensions(
+    this: void,
+    x: number,
+    y: number,
+    scaleX: number,
+    scaleY: number
+  ): void;
+  add(component: Node): void;
+  remove(component: Node): void;
   getByTag(tag: string): Node;
   activateByTag(tag: string): Urutora;
   deactivateByTag(tag: string): Urutora;
@@ -93,8 +100,8 @@ export interface Urutora {
   deactivateGroup(g: string): void;
   setGroupVisible(g: string, value: boolean): void;
   setGroupEnabled(g: string, value: boolean): void;
-  setStyle(style: any, nodeType?: string): Urutora;
-  setFocusedNode(node: any): void;
+  setStyle(style: Style, nodeType?: NodeType): Urutora;
+  setFocusedNode(node: Node): void;
   pressed(x: number, y: number, button: number): void;
   moved(x: number, y: number, dx: number, dy: number): void;
   released(x: number, y: number): void;
@@ -114,5 +121,5 @@ declare module "urutora" {
   /**
    * @customName new
    */
-  export function ctor(): Urutora;
+  export function build(): Urutora;
 }

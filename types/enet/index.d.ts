@@ -1,14 +1,8 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
 /**
  * @noResolution
  */
 declare module "enet" {
-  /**
-   * @noSelf
-   */
-  export function host_create(address?: string): Host;
-  /**
-   * @noSelf
-   */
-
-  export function linked_version(): string;
+  export function host_create(this: void, address?: string): Host;
+  export function linked_version(this: void): string;
 }

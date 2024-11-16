@@ -2,6 +2,7 @@ export enum NetEventTypes {
   None = -1,
   Connected = 0,
   Disconnected = 1,
+  // eslint-disable-next-line @typescript-eslint/prefer-literal-enum-member
   Last = Disconnected,
 }
 

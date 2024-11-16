@@ -65,6 +65,7 @@ export class ExtendedJoystick<T extends string>
 
   // listen(eventType: "pressed" | "released", callback: any);
   // listen(eventType: "actionPressed" | "actionReleased", callback: any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   listen(eventType: any, callback: any): void {
     if (eventType === "actionPressed" || eventType === "actionReleased") {
       return this.actionEventEmitter.listen(eventType, callback);

@@ -1,7 +1,7 @@
 import * as urutora from "urutora";
 import { Urutora } from "urutora";
 
-export const u: Urutora = (urutora as any).new();
+export const u: Urutora = urutora.build();
 urutora.utils.style = {
   ...urutora.utils.style,
   ...{

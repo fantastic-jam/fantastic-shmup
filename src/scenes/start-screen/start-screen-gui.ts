@@ -16,8 +16,6 @@ export const startScreenGui = (
     // w: config.screenWidth * 1,
     // h: config.screenHeight * 1,
   });
-  (panel as any).horizontalScale = 2;
-  (panel as any).verticalScale = 2;
   panel.w = config.screenWidth;
   panel.h = config.screenHeight;
 
@@ -28,7 +26,7 @@ export const startScreenGui = (
     // h: 30,
   });
   startButton.center();
-  startButton.action((e: any) => {
+  startButton.action((e: unknown) => {
     if (options.onStartAction) {
       options.onStartAction(e);
     }
@@ -40,7 +38,7 @@ export const startScreenGui = (
     // w: 200,
     // h: 30,
   });
-  hostButton.action((e: any) => {
+  hostButton.action((e: unknown) => {
     if (options.onHostAction) {
       options.onHostAction(e);
     }
@@ -54,7 +52,7 @@ export const startScreenGui = (
     // w: 200,
     // h: 30,
   });
-  joinButton.action((e: any) => {
+  joinButton.action((e: unknown) => {
     if (options.onJoinAction) {
       options.onJoinAction(e);
     }
@@ -65,9 +63,9 @@ export const startScreenGui = (
     joinButton.visible = false;
     joinButton.enabled = false;
   });
-  const text = u.text({
-    text: "host",
-  });
+  // const text = u.text({
+  //   text: "host",
+  // });
   const titleLabel = u.label({ text: "Fantastic Shmup" });
   titleLabel.center();
   titleLabel.setStyle({

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
 import { Font, Image } from "love.graphics";
 import { RGBA } from "love.math";
 
@@ -32,9 +33,9 @@ export interface Style {
   lineWidth: number;
   outline?: boolean;
   cornerRadius?: number;
-  font?: any;
-  sliderMark?: any;
-  toggleMark?: any;
+  font?: Font;
+  sliderMark?: Image;
+  toggleMark?: Image;
 
   // colors
   bgColor: RGBA;
@@ -47,9 +48,7 @@ export interface Style {
   pressedFgColor?: RGBA;
   progressBarGooColor?: RGBA;
 
-  customLayers?: {
-    [key: string]: Image;
-  };
+  customLayers?: Record<string, Image>;
 }
 
 export interface Node {
@@ -65,6 +64,17 @@ export interface Node {
   y?: number;
   align?: "left" | "center" | "right";
   originalW?: number;
+}
+
+interface DrawOptions {
+  centered?: boolean;
+  rotation?: number;
+  scale?: number;
+}
+
+interface PrintOptions {
+  bgColor?: RGBA;
+  fgColor?: RGBA;
 }
 
 export interface Utils {
@@ -106,15 +116,21 @@ export interface Utils {
   withOpacity(color: RGBA, alpha?: number): RGBA;
   needsBase(node: Node): boolean;
   split(input: string, sep?: string): string[];
-  print(text: string, x: number, y: number, data?: any): void;
-  prettyPrint(this: void, text: string, x: number, y: number, data?: {bgColor?: RGBA, fgColor?:RGBA}): void;
-  draw(texture: Image, x: number, y: number, data?: any): void;
+  print(text: string, x: number, y: number, data?: PrintOptions): void;
+  prettyPrint(
+    this: void,
+    text: string,
+    x: number,
+    y: number,
+    data?: PrintOptions
+  ): void;
+  draw(texture: Image, x: number, y: number, data?: DrawOptions): void;
   drawWithShader(
     node: Node,
     texture: Image,
     x: number,
     y: number,
-    data?: any
+    data?: DrawOptions
   ): void;
   rect(
     mode: "fill" | "line",
@@ -138,7 +154,7 @@ export interface Utils {
     h: number
   ): boolean;
   fixToggleBounds(node: Node): void;
-  disabledImgShader: any;
-  pointedImgShader: any;
-  pressedImgShader: any;
+  disabledImgShader: Image;
+  pointedImgShader: Image;
+  pressedImgShader: Image;
 }

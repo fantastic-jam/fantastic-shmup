@@ -21,7 +21,9 @@ export class GameScene implements Scene {
   music: Source;
   camera: Camera;
   ships = new Map<Player, Ship>();
-  networkStatus: LiaisonStatus = multiplayer.network?.getStatus() ?? LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
+  networkStatus: LiaisonStatus =
+    multiplayer.network?.getStatus() ??
+    LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
 
   private newEnemy(id: number): void {
     const enemy = new Enemy1(
@@ -34,7 +36,10 @@ export class GameScene implements Scene {
     );
     this.spriteEngine.addActor(enemy);
     if (multiplayer.network?.isServer()) {
-      multiplayer.network?.sendData(GameNetEventTypes.SyncActor, enemy.serialize());
+      multiplayer.network?.sendData(
+        GameNetEventTypes.SyncActor,
+        enemy.serialize()
+      );
     }
   }
 
@@ -70,11 +75,17 @@ export class GameScene implements Scene {
           ship.pos = new Vector2(100, 100);
           ship.setInvincible(3);
           if (multiplayer.network?.isServer()) {
-            multiplayer.network?.sendData(GameNetEventTypes.SyncActor, ship.serialize());
+            multiplayer.network?.sendData(
+              GameNetEventTypes.SyncActor,
+              ship.serialize()
+            );
           }
         });
         if (multiplayer.network?.isServer()) {
-          multiplayer.network?.sendData(GameNetEventTypes.SyncActor, ship.serialize());
+          multiplayer.network?.sendData(
+            GameNetEventTypes.SyncActor,
+            ship.serialize()
+          );
         }
       }
     }
@@ -108,7 +119,7 @@ export class GameScene implements Scene {
     });
   }
 
-  networkUpdate(dt: number): void {
+  networkUpdate(_dt: number): void {
     let receivedData = multiplayer.network?.receiveData();
     while (receivedData) {
       const [type, content] = receivedData;
@@ -153,7 +164,8 @@ export class GameScene implements Scene {
             const shipProps = Ship.deserialize(content);
             const player = this.players.find(
               (p) => p.id === shipProps.playerId
-            )!;
+            );
+            if (!player) throw new Error("Player not found");
             const newShip = new Ship(
               shipProps.id,
               this.spriteEngine,
@@ -195,36 +207,37 @@ export class GameScene implements Scene {
   }
 
   update(dt: number): void {
-    this.networkStatus = multiplayer.network?.getStatus() ?? LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
-    let idx = 0;
+    this.networkStatus =
+      multiplayer.network?.getStatus() ??
+      LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
     for (const localPlayer of this.players.filter((p) => p.peerId == null)) {
       if (this.networkStatus === LiaisonStatus.LIAISON_STATUS_CONNECTED) {
         // send ship position
         const ship = this.ships.get(localPlayer);
         if (ship) {
-          if (
-            (ship as unknown as any).lastPos?.x !== ship.pos.x ||
-            (ship as unknown as any).lastPos?.y !== ship.pos.y
-          ) {
+          if (ship.lastPos.x !== ship.pos.x || ship.lastPos.y !== ship.pos.y) {
             multiplayer.network?.sendData(
               GameNetEventTypes.Position,
               `${ship.id}|${ship.pos.x.toFixed(3)}|${ship.pos.y.toFixed(3)}`
             );
-            (ship as unknown as any).lastPos = Vector2.of(ship.pos);
+            ship.lastPos = Vector2.of(ship.pos);
           }
         }
       }
       if (localPlayer.joystick.isGamepadDown("start") && localPlayer.isDead) {
-        const ship = this.ships.get(localPlayer)!;
+        const ship = this.ships.get(localPlayer);
+        if (!ship) throw new Error("No ship found");
         this.spriteEngine.addActor(ship);
         if (multiplayer.network?.isServer()) {
-          multiplayer.network?.sendData(GameNetEventTypes.SyncActor, "" + ship.id);
+          multiplayer.network?.sendData(
+            GameNetEventTypes.SyncActor,
+            "" + ship.id
+          );
         }
       }
       if (localPlayer.joystick.isGamepadDown("back")) {
         love.event.quit(0);
       }
-      idx++;
     }
     this.networkUpdate(dt);
     this.starField.update(dt);

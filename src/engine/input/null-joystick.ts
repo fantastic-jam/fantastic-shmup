@@ -35,6 +35,7 @@ export class NullJoystick implements EventEmitterJoystick {
     "x",
     "y",
   ];
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   listen(_eventType: "pressed" | "released", _callback: (e: Event<"pressed" | "released", [Joystick, GamepadButton]>) => void): void {
   }
 

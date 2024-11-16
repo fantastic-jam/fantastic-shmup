@@ -24,14 +24,14 @@ Engine.preload(() => {
   image = love.graphics.newImage("/assets/ship.png");
 });
 
-export type DeserializedShip = {
+export interface DeserializedShip {
   id: number;
   pos: Vector2;
   playerId: number;
   color: [number, number, number];
   currentWeapon: number;
   invincibleUntil: number;
-};
+}
 
 export class Ship
   extends Actor
@@ -59,6 +59,7 @@ export class Ship
   public score = 0;
   public color: [number, number, number] = [1, 1, 1];
   public invincibleUntil = 0;
+  public lastPos: Vector2;
 
   constructor(
     id: number,
@@ -73,6 +74,7 @@ export class Ship
       [CollisionLayer.ENEMIES]
     );
     super(id, "Ship", spriteEngine, pos, 200, animatedSprite, collider);
+    this.lastPos = pos;
 
     this.weapons = [
       new WeaponGun(
@@ -97,7 +99,7 @@ export class Ship
   ): void {
     this.simpleEventEmitter.listen(eventType, callback);
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   damage(_src: Actor | undefined, _amount: number): void {
     this.simpleEventEmitter.pushEvent(new SimpleEvent("killed", this));
   }
