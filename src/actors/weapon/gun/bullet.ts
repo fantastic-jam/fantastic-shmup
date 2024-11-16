@@ -65,7 +65,7 @@ export class Bullet extends Actor {
           (actor as unknown as Damageable).damage &&
           this.collider?.collides(actor.collider)
         ) {
-          (actor as unknown as Damageable).damage(this.parent, 20);
+          (actor as unknown as Damageable).damage(this.parent, 25);
           this.spriteEngine.removeActor(this);
           if (multiplayer.network?.isServer()) {
             multiplayer.network?.sendData(GameNetEventTypes.RemoveActor, this.id.toString());

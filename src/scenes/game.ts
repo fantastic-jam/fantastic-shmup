@@ -32,7 +32,7 @@ export class GameScene implements Scene {
       new Vector2(
         config.screenWidth + love.math.random(config.screenWidth),
         love.math.random(config.screenHeight)
-      )
+      ),
     );
     this.spriteEngine.addActor(enemy);
     if (multiplayer.network?.isServer()) {
@@ -72,6 +72,7 @@ export class GameScene implements Scene {
         this.ships.set(p, ship);
         ship.listen("killed", (e) => {
           const ship = e.getSource();
+          ship.score = Math.max(ship.score - 1000, 0);
           ship.pos = new Vector2(100, 100);
           ship.setInvincible(3);
           if (multiplayer.network?.isServer()) {

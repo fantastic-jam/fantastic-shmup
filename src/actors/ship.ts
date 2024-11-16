@@ -99,7 +99,7 @@ export class Ship
   ): void {
     this.simpleEventEmitter.listen(eventType, callback);
   }
-   
+
   damage(_src: Actor | undefined, _amount: number): void {
     this.simpleEventEmitter.pushEvent(new SimpleEvent("killed", this));
   }
@@ -171,7 +171,10 @@ export class Ship
     if (this.isMainWeaponFiring()) {
       const fired = this.weapons[this.currentWeapon].fire();
       if (fired && this.player.isLocal() && multiplayer.network?.isClient()) {
-        multiplayer.sendData(GameNetEventTypes.Fire, `${this.id}|fire`);
+        multiplayer.network?.sendData(
+          GameNetEventTypes.Fire,
+          `${this.id}|fire`
+        );
       }
     }
 
@@ -187,7 +190,7 @@ export class Ship
         this.currentWeapon = weaponIdx;
       }
       if (multiplayer.network?.isClient() || multiplayer.network?.isServer()) {
-        multiplayer.sendData(
+        multiplayer.network?.sendData(
           GameNetEventTypes.ChangeWeapon,
           `${this.id}|${weaponIdx}`
         );
