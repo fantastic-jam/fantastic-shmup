@@ -1,16 +1,17 @@
 import { Source } from "love.audio";
 import { Screen } from "love.graphics";
 import { Enemy1 } from "../actors/enemies/enemy-1";
+import { EnemyBullet } from "../actors/enemies/enemy-bullets";
 import { Ship } from "../actors/ship";
 import { Bullet } from "../actors/weapon/gun/bullet";
 import { Missile } from "../actors/weapon/missile/missile";
 import { config } from "../conf";
 import { idGenerator } from "../engine/actor";
 import { Camera } from "../engine/camera";
+import { Vector2 } from "../engine/geometry/vector2";
 import { LiaisonStatus } from "../engine/network";
 import { Scene } from "../engine/scene";
 import { SpriteEngine } from "../engine/sprite-engine";
-import { Vector2 } from "../engine/geometry/vector2";
 import { Player } from "../player";
 import { StarField } from "../world/starfield";
 import { GameNetEventTypes, multiplayer } from "./multiplayer";
@@ -25,15 +26,28 @@ export class GameScene implements Scene {
     multiplayer.network?.getStatus() ??
     LiaisonStatus.LIAISON_STATUS_NOT_CONNECTED;
 
-  private newEnemy(id: number): void {
-    const enemy = new Enemy1(
-      id,
-      this.spriteEngine,
-      new Vector2(
-        config.screenWidth + love.math.random(config.screenWidth),
-        love.math.random(config.screenHeight)
-      ),
-    );
+  private newEnemy(
+    id: number,
+    type: "EnemyBullet" | "Enemy1" = "Enemy1"
+  ): void {
+    const enemy =
+      type === "EnemyBullet"
+        ? new EnemyBullet(
+            id,
+            this.spriteEngine,
+            new Vector2(
+              config.screenWidth + love.math.random(config.screenWidth),
+              love.math.random(config.screenHeight)
+            )
+          )
+        : new Enemy1(
+            id,
+            this.spriteEngine,
+            new Vector2(
+              config.screenWidth + love.math.random(config.screenWidth),
+              love.math.random(config.screenHeight)
+            )
+          );
     this.spriteEngine.addActor(enemy);
     if (multiplayer.network?.isServer()) {
       multiplayer.network?.sendData(
@@ -44,14 +58,18 @@ export class GameScene implements Scene {
   }
 
   constructor(private players: Player[]) {
-    const enemyCount = 6;
+    const enemyCount = 8;
+    const bulletCount = 16;
 
     this.camera = new Camera();
     this.starField = new StarField(this.camera, 200);
     this.spriteEngine = new SpriteEngine();
     if (!multiplayer.network?.isClient()) {
       for (let i = 0; i < enemyCount; i++) {
-        this.newEnemy(idGenerator.next());
+        this.newEnemy(idGenerator.next(), "Enemy1");
+      }
+      for (let i = 0; i < bulletCount; i++) {
+        this.newEnemy(idGenerator.next(), "EnemyBullet");
       }
     }
     this.music = love.audio.newSource("assets/fantastic-shmup.ogg", "stream");
