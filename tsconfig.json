@@ -7,13 +7,14 @@
     "module": "CommonJS",
     "types": [
       "love-typescript-definitions",
-      "@typescript-to-lua/language-extensions",
+      "@typescript-to-lua/language-extensions"
     ],
+    "noEmit": true,
     "typeRoots": ["./node_modules", "./node_modules/@types", "./types"],
     "rootDir": "src",
     "outDir": "lua"
   },
 
-  "include": ["src/**/**.ts", "types/**/*.d.ts",],
-  "tstl": { "luaTarget": "JIT" }
+  "include": ["src/**/**.ts", "types/**/*.d.ts"],
+  "tstl": { "luaTarget": "universal" }
 }
