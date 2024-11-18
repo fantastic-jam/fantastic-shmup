@@ -6,7 +6,8 @@ import { BoxCollider2d } from "../../engine/collision/box-collider2d";
 import { Engine } from "../../engine/engine";
 import { SpriteEngine } from "../../engine/sprite-engine";
 import { AnimatedSprite } from "../../engine/sprite/animated-sprite";
-import { Rectangle, Vector2 } from "../../engine/tools";
+import { Rectangle } from "../../engine/geometry/rectangle";
+import { Vector2 } from "../../engine/geometry/vector2";
 import { GameNetEventTypes, multiplayer } from "../../scenes/multiplayer";
 import { Ship } from "../ship";
 

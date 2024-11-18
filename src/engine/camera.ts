@@ -1,4 +1,4 @@
-import { Vector2 } from "./tools";
+import { Vector2 } from "./geometry/vector2";
 
 export class Camera {
   public scale: number;

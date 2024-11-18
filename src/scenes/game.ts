@@ -10,7 +10,7 @@ import { Camera } from "../engine/camera";
 import { LiaisonStatus } from "../engine/network";
 import { Scene } from "../engine/scene";
 import { SpriteEngine } from "../engine/sprite-engine";
-import { Vector2 } from "../engine/tools";
+import { Vector2 } from "../engine/geometry/vector2";
 import { Player } from "../player";
 import { StarField } from "../world/starfield";
 import { GameNetEventTypes, multiplayer } from "./multiplayer";

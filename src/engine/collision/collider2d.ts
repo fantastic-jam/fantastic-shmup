@@ -1,5 +1,5 @@
 import { Actor } from "../actor";
-import { Vector2 } from "../tools";
+import { Vector2 } from "../geometry/vector2";
 
 export type ColliderType = "box";
 

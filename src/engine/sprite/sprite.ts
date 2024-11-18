@@ -1,5 +1,5 @@
 import { Screen } from "love.graphics";
-import { Vector2 } from "../tools";
+import { Vector2 } from "../geometry/vector2";
 
 export interface Sprite {
   update(dt: number): void;

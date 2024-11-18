@@ -1,7 +1,7 @@
 import { Screen } from "love.graphics";
 import { config } from "../conf";
 import { Camera } from "../engine/camera";
-import { Vector3 } from "../engine/tools";
+import { Vector3 } from "../engine/geometry/vector3";
 
 export class Star {
   constructor(public pos: Vector3) {}

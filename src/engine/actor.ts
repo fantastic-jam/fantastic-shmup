@@ -2,7 +2,7 @@ import { Screen } from "love.graphics";
 import { Collider2d } from "./collision/collider2d";
 import { SpriteEngine } from "./sprite-engine";
 import { Sprite } from "./sprite/sprite";
-import { Vector2 } from "./tools";
+import { Vector2 } from "./geometry/vector2";
 
 export interface Damageable {
   isInvincible(): boolean;

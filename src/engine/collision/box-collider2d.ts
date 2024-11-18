@@ -1,5 +1,6 @@
 import { Actor } from "../actor";
-import { Rectangle, Vector2 } from "../tools";
+import { Rectangle } from "../geometry/rectangle";
+import { Vector2 } from "../geometry/vector2";
 import { Collider2d } from "./collider2d";
 
 function collides(a: Rectangle, b: Rectangle): boolean {

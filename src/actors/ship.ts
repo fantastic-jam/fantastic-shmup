@@ -12,7 +12,8 @@ import {
 } from "../engine/event";
 import { SpriteEngine } from "../engine/sprite-engine";
 import { AnimatedSprite } from "../engine/sprite/animated-sprite";
-import { Rectangle, Vector2 } from "../engine/tools";
+import { Rectangle } from "../engine/geometry/rectangle";
+import { Vector2 } from "../engine/geometry/vector2";
 import { Player } from "../player";
 import { GameNetEventTypes, multiplayer } from "../scenes/multiplayer";
 import { WeaponGun } from "./weapon/gun/weapon_gun";
@@ -50,6 +51,7 @@ export class Ship
    * @returns True if the ship is invincible
    */
   isInvincible(): boolean {
+    //return true;
     return this.invincibleUntil > love.timer.getTime();
   }
 
@@ -108,7 +110,7 @@ export class Ship
     return this.score;
   }
 
-  private getDir(): { x: number; y: number } {
+  private getDir(): Vector2 {
     let x = 0;
     let y = 0;
 
@@ -138,7 +140,7 @@ export class Ship
     if (Math.abs(axisY) > 0.2) {
       y = axisY;
     }
-    return { x, y };
+    return Vector2.of({ x, y }).normalize();
   }
 
   private isMainWeaponFiring(): boolean {

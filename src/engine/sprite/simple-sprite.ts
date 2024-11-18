@@ -1,5 +1,5 @@
 import { Image } from "love.graphics";
-import { Vector2 } from "../tools";
+import { Vector2 } from "../geometry/vector2";
 import { Sprite } from "./sprite";
 
 export class SimpleSprite implements Sprite {
